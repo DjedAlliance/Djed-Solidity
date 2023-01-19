@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./Coin.sol";
 import "./IOracle.sol";
-import "./test/utils/Console.sol";
 
 contract Djed {
     IOracle public oracle;
