@@ -30,37 +30,11 @@ contract Djed {
     uint256 public immutable scDecimalScalingFactor;
     uint256 public immutable rcDecimalScalingFactor;
 
-    event BoughtStableCoins(
-        address indexed buyer,
-        address indexed receiver,
-        uint256 amountSC,
-        uint256 amountBC
-    );
-    event SoldStableCoins(
-        address indexed seller,
-        address indexed receiver,
-        uint256 amountSC,
-        uint256 amountBC
-    );
-    event BoughtReserveCoins(
-        address indexed buyer,
-        address indexed receiver,
-        uint256 amountRC,
-        uint256 amountBC
-    );
-    event SoldReserveCoins(
-        address indexed seller,
-        address indexed receiver,
-        uint256 amountRC,
-        uint256 amountBC
-    );
-    event SoldBothCoins(
-        address indexed seller,
-        address indexed receiver,
-        uint256 amountSC,
-        uint256 amountRC,
-        uint256 amountBC
-    );
+    event BoughtStableCoins(address indexed buyer, address indexed receiver, uint256 amountSC, uint256 amountBC);
+    event SoldStableCoins(address indexed seller, address indexed receiver, uint256 amountSC, uint256 amountBC);
+    event BoughtReserveCoins(address indexed buyer, address indexed receiver, uint256 amountRC, uint256 amountBC);
+    event SoldReserveCoins(address indexed seller, address indexed receiver, uint256 amountRC, uint256 amountBC);
+    event SoldBothCoins(address indexed seller, address indexed receiver, uint256 amountSC, uint256 amountRC, uint256 amountBC);
 
     constructor(
         address oracleAddress, uint256 _scalingFactor,
