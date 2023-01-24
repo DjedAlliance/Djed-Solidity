@@ -1,12 +1,12 @@
 {
-  "name": "forge-template",
-  "author": "FrankieIsLost",
+  "name": "Djed",
+  "author": "",
   "version": "1.0.0",
-  "description": "A forge template",
-  "homepage": "https://github.com/FrankieIsLost/forge-template#readme",
+  "description": "Djed Stablecoin",
+  "homepage": "https://github.com/DjedAlliance/Djed-Solidity",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FrankieIsLost/forge-template.git"
+    "url": "git+https://github.com/DjedAlliance/Djed-Solidity.git"
   },
   "scripts": {
     "prettier": "prettier --write 'src/**/*.sol'",
