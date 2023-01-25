@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - cicd_coverage
   pull_request:
 
 jobs:
@@ -26,3 +26,6 @@ jobs:
 
       - name: Run tests
         run: forge test
+
+      - name: run coverage
+        run: forge coverage |sed -e '10,30d'|sed -e '1,5d'
