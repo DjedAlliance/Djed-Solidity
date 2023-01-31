@@ -2,9 +2,10 @@ name: CI
 on:
   push:
     branches:
-      - cicd_coverage
+      - main
   pull_request:
-
+    branches:
+      - main
 jobs:
   run-ci:
     runs-on: ubuntu-latest
