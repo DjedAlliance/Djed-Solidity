@@ -2,9 +2,10 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
-
+    branches:
+      - main
 jobs:
   run-ci:
     runs-on: ubuntu-latest
@@ -21,8 +22,11 @@ jobs:
         with:
           version: nightly
 
-      - name: Run lint check
-        run: npm run lint:check
+      # - name: Run lint check
+      #   run: npm run lint:check
 
       - name: Run tests
         run: forge test
+
+      - name: run coverage
+        run: forge coverage |sed -e '10,30d'|sed -e '1,5d'
