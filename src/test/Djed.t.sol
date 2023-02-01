@@ -9,9 +9,9 @@ import "../mock/MockOracle.sol";
 import "./Utilities.sol";
 
 contract DjedTest is CTest, Utilities {
-    MockOracle oracle;
-    Djed djed;
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+    MockOracle private oracle;
+    Djed private djed;
+    CheatCodes private cheats = CheatCodes(HEVM_ADDRESS);
 
     function setUp() public {
         oracle = new MockOracle(ORACLE_EXCHANGE_RATE);
@@ -130,5 +130,74 @@ contract DjedTest is CTest, Utilities {
         cheats.prank(account1);
         cheats.expectRevert("sellRC: ratio below min");
         djed.sellReserveCoins(99e5, account1, 0, address(0));
+    }
+
+    function testSellBothCoins() public {
+        cheats.prank(account1);
+        djed.buyStableCoins{value: 1e17}(account1, 0, address(0));
+        djed.buyReserveCoins{value: 1e20}(account1, 0, address(0));
+
+        uint256 scTotalSupplyBefore = djed.stableCoin().totalSupply();
+        uint256 rcTotalSupplyBefore = djed.reserveCoin().totalSupply();
+
+        assertEq(djed.stableCoin().balanceOf(account1), 198000);
+        assertEq(djed.reserveCoin().balanceOf(account1), 99000000);
+
+        cheats.prank(account1);
+        djed.sellBothCoins(8000, 900000, account1, 0, address(0));
+
+        assertEq(djed.stableCoin().balanceOf(account1), 190000);
+        assertEq(djed.reserveCoin().balanceOf(account1), 98100000);
+
+        uint256 scTotalSupplyAfter = djed.stableCoin().totalSupply();
+        uint256 rcTotalSupplyAfter = djed.reserveCoin().totalSupply();
+
+        assertEq(scTotalSupplyAfter, scTotalSupplyBefore - 8000);
+        assertEq(rcTotalSupplyAfter, rcTotalSupplyBefore - 900000);
+    }
+
+    function testCannotSellBothCoinsInsufficientBalance() public {
+        cheats.prank(account1);
+        djed.buyStableCoins{value: 1e17}(account1, 0, address(0));
+        djed.buyReserveCoins{value: 1e20}(account1, 0, address(0));
+
+        uint256 scBalanceBefore = djed.stableCoin().balanceOf(account1);
+        uint256 rcBalanceBefore = djed.reserveCoin().balanceOf(account1);
+
+        cheats.expectRevert( "sellBoth: insufficient SC balance");
+        djed.sellBothCoins(scBalanceBefore + 1, 0, account1, 0, address(0));
+
+
+        cheats.prank(account1);
+        cheats.expectRevert( "sellBoth: insufficient RC balance");
+        djed.sellBothCoins(0, rcBalanceBefore + 1, account1, 0, address(0));
+    }
+
+    function testCannotSellBothCoinsRatioDecreased() public {
+        cheats.prank(account1);
+        djed.buyStableCoins{value: 1e17}(account1, 0, address(0));
+        djed.buyReserveCoins{value: 1e20}(account1, 0, address(0));
+
+        cheats.prank(account1);
+        cheats.expectRevert("sellBoth: reserve ratio decreased");
+        djed.sellBothCoins(0, 1, account1, 0, address(0));
+    }
+
+    function testSellStableWithSellBothMethod() public {
+        cheats.prank(account1);
+        djed.buyStableCoins{value: 1e17}(account1, 0, address(0));
+        djed.buyReserveCoins{value: 1e20}(account1, 0, address(0));
+
+        uint256 scBalanceBefore = djed.stableCoin().balanceOf(account1);
+        uint256 rcBalanceBefore = djed.reserveCoin().balanceOf(account1);
+
+        cheats.prank(account1);
+        djed.sellBothCoins(scBalanceBefore, 0, account1, 0, address(0));
+
+        uint256 scBalanceAfter = djed.stableCoin().balanceOf(account1);
+        uint256 rcBalanceAfter = djed.reserveCoin().balanceOf(account1);
+
+        assertEq(scBalanceAfter, 0);
+        assertEq(rcBalanceAfter, rcBalanceBefore);
     }
 }
