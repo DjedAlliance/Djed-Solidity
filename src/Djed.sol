@@ -164,10 +164,10 @@ contract Djed {
         uint256 f = (value * fee) / scalingFactor;
         uint256 f_ui = (value * fee_ui) / scalingFactor;
         uint256 f_t = (value * treasuryFee()) / scalingFactor;
-        // payable(address(this)).transfer(f); // this happens implicitly, and thus `f` is effectively transfered to the reserve.
-        payable(ui).transfer(f_ui);
-        payable(treasury).transfer(f_t);
         treasuryRevenue += f_t;
+        payable(treasury).transfer(f_t);
+        payable(ui).transfer(f_ui);
+        // payable(address(this)).transfer(f); // this happens implicitly, and thus `f` is effectively transfered to the reserve.
         return value - f - f_ui - f_t; // amountBC
     }
 
