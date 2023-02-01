@@ -84,7 +84,7 @@ contract Djed {
     }
 
     function ratio(uint256 _scPrice) internal view returns (uint256) {
-        return R(0) / L(_scPrice);
+        return scalingFactor * R(0) / L(_scPrice);
     }
 
     function ratio() external view returns (uint256) {
