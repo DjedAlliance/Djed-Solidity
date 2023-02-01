@@ -203,7 +203,7 @@ contract Djed {
     function rcTargetPrice(uint256 _scPrice, uint256 _currentPaymentAmount) internal view returns (uint256)
     {
         uint256 sRC = reserveCoin.totalSupply();
-        require(sRC != 0);
+        require(sRC != 0, "RC supply is zero");
         return (E(_scPrice, _currentPaymentAmount) * rcDecimalScalingFactor) / sRC;
     }
 
