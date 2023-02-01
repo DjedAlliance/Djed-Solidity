@@ -8,7 +8,7 @@ import "../Djed.sol";
 import "../mock/MockOracle.sol";
 import "./Utilities.sol";
 
-contract MinimalDjedTest is CTest, Utilities {
+contract DjedTest is CTest, Utilities {
     MockOracle oracle;
     Djed djed;
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
