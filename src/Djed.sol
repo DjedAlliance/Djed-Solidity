@@ -83,12 +83,8 @@ contract Djed {
         return E(scPrice(_currentPaymentAmount), _currentPaymentAmount);
     }
 
-    function ratio(uint256 _scPrice) internal view returns (uint256) {
-        return scalingFactor * R(0) / L(_scPrice);
-    }
-
     function ratio() external view returns (uint256) {
-        return ratio(scPrice(0));
+        return scalingFactor * R(0) / L(scPrice(0));
     }
 
     // # Public Trading Functions:
@@ -145,7 +141,8 @@ contract Djed {
         require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellBoth: insufficient SC balance");
         require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellBoth: insufficient RC balance");
         uint256 scP = scPrice(0);
-        uint256 preRatio = ratio(scP);
+        uint256 preR = R(0);
+        uint256 preL = L(scP);
         uint256 value = (amountSC * scP) / scDecimalScalingFactor + (amountRC * rcTargetPrice(scP, 0)) / rcDecimalScalingFactor;
         require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() <= thresholdSupplySC,
             "sellBoth: tx limit exceeded"
@@ -154,7 +151,7 @@ contract Djed {
         reserveCoin.burn(msg.sender, amountRC);
         uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue`
         payable(receiver).transfer(amountBC);
-        require(ratio(scP) >= preRatio, "sellBoth: reserve ratio decreased");
+        require(R(0) * preL >= preR * L(scP), "sellBoth: reserve ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
         emit SoldBothCoins(msg.sender, receiver, amountSC, amountRC, amountBC);
     }
 
