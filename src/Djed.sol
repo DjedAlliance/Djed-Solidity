@@ -94,6 +94,7 @@ contract Djed {
         uint256 scP = scPrice(msg.value);
         uint256 amountSC = (amountBC * scDecimalScalingFactor) / scP;
         require(amountSC <= txLimit || stableCoin.totalSupply() <= thresholdSupplySC, "buySC: tx limit exceeded");
+        require(amountSC > 0, "buySC: receiving zero SCs");
         stableCoin.mint(receiver, amountSC);
         require(isRatioAboveMin(scP), "buySC: ratio below min");
         emit BoughtStableCoins(msg.sender, receiver, amountSC, msg.value);
@@ -105,6 +106,7 @@ contract Djed {
         uint256 scP = scPrice(0);
         uint256 value = (amountSC * scP) / scDecimalScalingFactor;
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue`
+        require(amountBC > 0, "sellSC: receiving zero BCs");
         stableCoin.burn(msg.sender, amountSC);
         payable(receiver).transfer(amountBC);
         emit SoldStableCoins(msg.sender, receiver, amountSC, amountBC);
@@ -118,6 +120,7 @@ contract Djed {
         );
         uint256 amountBC = deductFees(msg.value, fee_ui, ui); // side-effect: increases `treasuryRevenue`
         uint256 amountRC = (amountBC * rcDecimalScalingFactor) / rcBP;
+        require(amountRC > 0, "buyRC: receiving zero RCs");
         reserveCoin.mint(receiver, amountRC);
         require(isRatioBelowMax(scP) || stableCoin.totalSupply() <= thresholdSupplySC, "buyRC: ratio above max");
         emit BoughtReserveCoins(msg.sender, receiver, amountRC, msg.value);
@@ -131,6 +134,7 @@ contract Djed {
             "sellRC: tx limit exceeded"
         );
         uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue`
+        require(amountBC > 0, "sellRC: receiving zero BCs");
         reserveCoin.burn(msg.sender, amountRC);
         payable(receiver).transfer(amountBC);
         require(isRatioAboveMin(scP), "sellRC: ratio below min");
@@ -150,6 +154,7 @@ contract Djed {
         stableCoin.burn(msg.sender, amountSC);
         reserveCoin.burn(msg.sender, amountRC);
         uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue`
+        require(amountBC > 0, "sellBoth: receiving zero BCs");
         payable(receiver).transfer(amountBC);
         require(R(0) * preL >= preR * L(scP), "sellBoth: reserve ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
         emit SoldBothCoins(msg.sender, receiver, amountSC, amountRC, amountBC);
