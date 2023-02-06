@@ -138,8 +138,8 @@ contract Djed {
     }
 
     function sellBothCoins(uint256 amountSC, uint256 amountRC, address receiver, uint256 feeUI, address ui) external {
-        require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellBoth: insufficient SC balance");
-        require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellBoth: insufficient RC balance");
+        require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellBoth: insufficient SCs");
+        require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellBoth: insufficient RCs");
         uint256 scP = scPrice(0);
         uint256 preR = R(0);
         uint256 preL = L(scP);
@@ -150,7 +150,7 @@ contract Djed {
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellBoth: receiving zero BCs");
         payable(receiver).transfer(amountBC);
-        require(R(0) * preL >= preR * L(scPrice(0)), "sellBoth: reserve ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
+        require(R(0) * preL >= preR * L(scPrice(0)), "sellBoth: ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
         emit SoldBothCoins(msg.sender, receiver, amountSC, amountRC, amountBC);
     }
 
