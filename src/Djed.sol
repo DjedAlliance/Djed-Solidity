@@ -96,7 +96,7 @@ contract Djed {
         require(amountSC <= txLimit || stableCoin.totalSupply() <= thresholdSupplySC, "buySC: tx limit exceeded");
         require(amountSC > 0, "buySC: receiving zero SCs");
         stableCoin.mint(receiver, amountSC);
-        require(isRatioAboveMin(scP), "buySC: ratio below min");
+        require(isRatioAboveMin(scPrice(0)), "buySC: ratio below min");
         emit BoughtStableCoins(msg.sender, receiver, amountSC, msg.value);
     }
 
@@ -122,7 +122,7 @@ contract Djed {
         uint256 amountRC = (amountBC * rcDecimalScalingFactor) / rcBP;
         require(amountRC > 0, "buyRC: receiving zero RCs");
         reserveCoin.mint(receiver, amountRC);
-        require(isRatioBelowMax(scP) || stableCoin.totalSupply() <= thresholdSupplySC, "buyRC: ratio above max");
+        require(isRatioBelowMax(scPrice(0)) || stableCoin.totalSupply() <= thresholdSupplySC, "buyRC: ratio above max");
         emit BoughtReserveCoins(msg.sender, receiver, amountRC, msg.value);
     }
 
@@ -137,7 +137,7 @@ contract Djed {
         require(amountBC > 0, "sellRC: receiving zero BCs");
         reserveCoin.burn(msg.sender, amountRC);
         payable(receiver).transfer(amountBC);
-        require(isRatioAboveMin(scP), "sellRC: ratio below min");
+        require(isRatioAboveMin(scPrice(0)), "sellRC: ratio below min");
         emit SoldReserveCoins(msg.sender, receiver, amountRC, amountBC);
     }
 
@@ -156,7 +156,7 @@ contract Djed {
         uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellBoth: receiving zero BCs");
         payable(receiver).transfer(amountBC);
-        require(R(0) * preL >= preR * L(scP), "sellBoth: reserve ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
+        require(R(0) * preL >= preR * L(scPrice(0)), "sellBoth: reserve ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
         emit SoldBothCoins(msg.sender, receiver, amountSC, amountRC, amountBC);
     }
 
