@@ -90,8 +90,8 @@ contract Djed {
     // # Public Trading Functions:
 
     function buyStableCoins(address receiver, uint256 feeUI, address ui) external payable {
-        uint256 amountBC = deductFees(msg.value, feeUI, ui); // side-effect: increases `treasuryRevenue`
         uint256 scP = scPrice(msg.value);
+        uint256 amountBC = deductFees(msg.value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         uint256 amountSC = (amountBC * scDecimalScalingFactor) / scP;
         require(amountSC <= txLimit || stableCoin.totalSupply() <= thresholdSupplySC, "buySC: tx limit exceeded");
         require(amountSC > 0, "buySC: receiving zero SCs");
@@ -105,7 +105,7 @@ contract Djed {
         require(amountSC <= txLimit || stableCoin.totalSupply() <= thresholdSupplySC, "sellSC: tx limit exceeded");
         uint256 scP = scPrice(0);
         uint256 value = (amountSC * scP) / scDecimalScalingFactor;
-        uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue`
+        uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellSC: receiving zero BCs");
         stableCoin.burn(msg.sender, amountSC);
         payable(receiver).transfer(amountBC);
@@ -118,7 +118,7 @@ contract Djed {
         require(msg.value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() <= thresholdSupplySC,
             "buyRC: tx limit exceeded"
         );
-        uint256 amountBC = deductFees(msg.value, fee_ui, ui); // side-effect: increases `treasuryRevenue`
+        uint256 amountBC = deductFees(msg.value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         uint256 amountRC = (amountBC * rcDecimalScalingFactor) / rcBP;
         require(amountRC > 0, "buyRC: receiving zero RCs");
         reserveCoin.mint(receiver, amountRC);
@@ -133,7 +133,7 @@ contract Djed {
         require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() <= thresholdSupplySC,
             "sellRC: tx limit exceeded"
         );
-        uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue`
+        uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellRC: receiving zero BCs");
         reserveCoin.burn(msg.sender, amountRC);
         payable(receiver).transfer(amountBC);
@@ -153,7 +153,7 @@ contract Djed {
         );
         stableCoin.burn(msg.sender, amountSC);
         reserveCoin.burn(msg.sender, amountRC);
-        uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue`
+        uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellBoth: receiving zero BCs");
         payable(receiver).transfer(amountBC);
         require(R(0) * preL >= preR * L(scP), "sellBoth: reserve ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
