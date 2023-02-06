@@ -93,7 +93,7 @@ contract Djed {
         uint256 scP = scPrice(msg.value);
         uint256 amountBC = deductFees(msg.value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         uint256 amountSC = (amountBC * scDecimalScalingFactor) / scP;
-        require(amountSC <= txLimit || stableCoin.totalSupply() <= thresholdSupplySC, "buySC: tx limit exceeded");
+        require(amountSC <= txLimit || stableCoin.totalSupply() < thresholdSupplySC, "buySC: tx limit exceeded");
         require(amountSC > 0, "buySC: receiving zero SCs");
         stableCoin.mint(receiver, amountSC);
         require(isRatioAboveMin(scPrice(0)), "buySC: ratio below min");
@@ -102,7 +102,7 @@ contract Djed {
 
     function sellStableCoins(uint256 amountSC, address receiver, uint256 feeUI, address ui) external {
         require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellSC: insufficient SC balance");
-        require(amountSC <= txLimit || stableCoin.totalSupply() <= thresholdSupplySC, "sellSC: tx limit exceeded");
+        require(amountSC <= txLimit || stableCoin.totalSupply() < thresholdSupplySC, "sellSC: tx limit exceeded");
         uint256 scP = scPrice(0);
         uint256 value = (amountSC * scP) / scDecimalScalingFactor;
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
@@ -115,14 +115,14 @@ contract Djed {
     function buyReserveCoins(address receiver, uint256 fee_ui, address ui) external payable {
         uint256 scP = scPrice(msg.value);
         uint256 rcBP = rcBuyingPrice(scP, msg.value);
-        require(msg.value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() <= thresholdSupplySC,
+        require(msg.value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC,
             "buyRC: tx limit exceeded"
         );
         uint256 amountBC = deductFees(msg.value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         uint256 amountRC = (amountBC * rcDecimalScalingFactor) / rcBP;
         require(amountRC > 0, "buyRC: receiving zero RCs");
         reserveCoin.mint(receiver, amountRC);
-        require(isRatioBelowMax(scPrice(0)) || stableCoin.totalSupply() <= thresholdSupplySC, "buyRC: ratio above max");
+        require(isRatioBelowMax(scPrice(0)) || stableCoin.totalSupply() < thresholdSupplySC, "buyRC: ratio above max");
         emit BoughtReserveCoins(msg.sender, receiver, amountRC, msg.value);
     }
 
@@ -130,7 +130,7 @@ contract Djed {
         require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellRC: insufficient RC balance");
         uint256 scP = scPrice(0);
         uint256 value = (amountRC * rcTargetPrice(scP, 0)) / rcDecimalScalingFactor;
-        require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() <= thresholdSupplySC,
+        require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC,
             "sellRC: tx limit exceeded"
         );
         uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
@@ -148,7 +148,7 @@ contract Djed {
         uint256 preR = R(0);
         uint256 preL = L(scP);
         uint256 value = (amountSC * scP) / scDecimalScalingFactor + (amountRC * rcTargetPrice(scP, 0)) / rcDecimalScalingFactor;
-        require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() <= thresholdSupplySC,
+        require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC,
             "sellBoth: tx limit exceeded"
         );
         stableCoin.burn(msg.sender, amountSC);
