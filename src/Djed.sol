@@ -114,7 +114,7 @@ contract Djed {
 
     function buyReserveCoins(address receiver, uint256 fee_ui, address ui) external payable {
         uint256 scP = scPrice(msg.value);
-        uint256 rcBP = rcBuyingPrice(scP);
+        uint256 rcBP = rcBuyingPrice(scP, msg.value);
         require(msg.value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() <= thresholdSupplySC,
             "buyRC: tx limit exceeded"
         );
@@ -209,7 +209,7 @@ contract Djed {
         return (E(_scPrice, _currentPaymentAmount) * rcDecimalScalingFactor) / sRC;
     }
 
-    function rcBuyingPrice(uint256 _currentPaymentAmount) public view returns (uint256) {
+    function rcBuyingPrice(uint256 _currentPaymentAmount) external view returns (uint256) {
         return rcBuyingPrice(scPrice(_currentPaymentAmount), _currentPaymentAmount);
     }
 
