@@ -174,11 +174,11 @@ contract Djed {
     }
 
     function isRatioAboveMin(uint256 _scPrice) internal view returns (bool) {
-        return R(0) * scalingFactor * scDecimalScalingFactor > stableCoin.totalSupply() * _scPrice * reserveRatioMin;
+        return R(0) * scalingFactor * scDecimalScalingFactor >= stableCoin.totalSupply() * _scPrice * reserveRatioMin;
     }
 
     function isRatioBelowMax(uint256 _scPrice) internal view returns (bool) {
-        return R(0) * scalingFactor * scDecimalScalingFactor < stableCoin.totalSupply() * _scPrice * reserveRatioMax;
+        return R(0) * scalingFactor * scDecimalScalingFactor <= stableCoin.totalSupply() * _scPrice * reserveRatioMax;
     }
 
     // Treasury Fee: starts as `initialTreasuryFee` and decreases linearly to 0 as the `treasuryRevenue` approaches the `treasuryRevenueTarget`
