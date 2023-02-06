@@ -112,10 +112,10 @@ contract Djed {
         emit SoldStableCoins(msg.sender, receiver, amountSC, amountBC);
     }
 
-    function buyReserveCoins(address receiver, uint256 fee_ui, address ui) external payable {
+    function buyReserveCoins(address receiver, uint256 feeUI, address ui) external payable {
         uint256 scP = scPrice(msg.value);
         uint256 rcBP = rcBuyingPrice(scP, msg.value);
-        uint256 amountBC = deductFees(msg.value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
+        uint256 amountBC = deductFees(msg.value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC, "buyRC: tx limit exceeded");
         uint256 amountRC = (amountBC * rcDecimalScalingFactor) / rcBP;
         require(amountRC > 0, "buyRC: receiving zero RCs");
@@ -124,12 +124,12 @@ contract Djed {
         emit BoughtReserveCoins(msg.sender, receiver, amountRC, msg.value);
     }
 
-    function sellReserveCoins(uint256 amountRC, address receiver, uint256 fee_ui, address ui) external {
+    function sellReserveCoins(uint256 amountRC, address receiver, uint256 feeUI, address ui) external {
         require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellRC: insufficient RC balance");
         uint256 scP = scPrice(0);
         uint256 value = (amountRC * rcTargetPrice(scP, 0)) / rcDecimalScalingFactor;
         require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC, "sellRC: tx limit exceeded");
-        uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
+        uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellRC: receiving zero BCs");
         reserveCoin.burn(msg.sender, amountRC);
         payable(receiver).transfer(amountBC);
@@ -137,7 +137,7 @@ contract Djed {
         emit SoldReserveCoins(msg.sender, receiver, amountRC, amountBC);
     }
 
-    function sellBothCoins(uint256 amountSC, uint256 amountRC, address receiver, uint256 fee_ui, address ui) external {
+    function sellBothCoins(uint256 amountSC, uint256 amountRC, address receiver, uint256 feeUI, address ui) external {
         require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellBoth: insufficient SC balance");
         require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellBoth: insufficient RC balance");
         uint256 scP = scPrice(0);
@@ -147,7 +147,7 @@ contract Djed {
         require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC, "sellBoth: tx limit exceeded");
         stableCoin.burn(msg.sender, amountSC);
         reserveCoin.burn(msg.sender, amountRC);
-        uint256 amountBC = deductFees(value, fee_ui, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
+        uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellBoth: receiving zero BCs");
         payable(receiver).transfer(amountBC);
         require(R(0) * preL >= preR * L(scPrice(0)), "sellBoth: reserve ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
@@ -156,15 +156,15 @@ contract Djed {
 
     // # Auxiliary Functions
 
-    function deductFees(uint256 value, uint256 fee_ui, address ui) internal returns (uint256) {
+    function deductFees(uint256 value, uint256 feeUI, address ui) internal returns (uint256) {
         uint256 f = (value * fee) / scalingFactor;
-        uint256 f_ui = (value * fee_ui) / scalingFactor;
-        uint256 f_t = (value * treasuryFee()) / scalingFactor;
-        treasuryRevenue += f_t;
-        payable(treasury).transfer(f_t);
-        payable(ui).transfer(f_ui);
+        uint256 fUI = (value * feeUI) / scalingFactor;
+        uint256 fT = (value * treasuryFee()) / scalingFactor;
+        treasuryRevenue += fT;
+        payable(treasury).transfer(fT);
+        payable(ui).transfer(fUI);
         // payable(address(this)).transfer(f); // this happens implicitly, and thus `f` is effectively transfered to the reserve.
-        return value - f - f_ui - f_t; // amountBC
+        return value - f - fUI - fT; // amountBC
     }
 
     function isRatioAboveMin(uint256 _scPrice) internal view returns (bool) {
