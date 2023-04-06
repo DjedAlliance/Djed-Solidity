@@ -2,10 +2,11 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./Coin.sol";
 import "./IOracle.sol";
 
-contract Djed {
+contract Djed is ReentrancyGuard {
     IOracle public oracle;
     Coin public stableCoin;
     Coin public reserveCoin;
@@ -89,7 +90,7 @@ contract Djed {
 
     // # Public Trading Functions:
 
-    function buyStableCoins(address receiver, uint256 feeUI, address ui) external payable {
+    function buyStableCoins(address receiver, uint256 feeUI, address ui) external payable nonReentrant {
         uint256 scP = scPrice(msg.value);
         uint256 amountBC = deductFees(msg.value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         uint256 amountSC = (amountBC * scDecimalScalingFactor) / scP;
@@ -100,7 +101,7 @@ contract Djed {
         emit BoughtStableCoins(msg.sender, receiver, amountSC, msg.value);
     }
 
-    function sellStableCoins(uint256 amountSC, address receiver, uint256 feeUI, address ui) external {
+    function sellStableCoins(uint256 amountSC, address receiver, uint256 feeUI, address ui) external nonReentrant {
         require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellSC: insufficient SC balance");
         require(amountSC <= txLimit || stableCoin.totalSupply() < thresholdSupplySC, "sellSC: tx limit exceeded");
         uint256 scP = scPrice(0);
@@ -112,7 +113,7 @@ contract Djed {
         emit SoldStableCoins(msg.sender, receiver, amountSC, amountBC);
     }
 
-    function buyReserveCoins(address receiver, uint256 feeUI, address ui) external payable {
+    function buyReserveCoins(address receiver, uint256 feeUI, address ui) external payable nonReentrant {
         uint256 scP = scPrice(msg.value);
         uint256 rcBP = rcBuyingPrice(scP, msg.value);
         uint256 amountBC = deductFees(msg.value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
@@ -124,7 +125,7 @@ contract Djed {
         emit BoughtReserveCoins(msg.sender, receiver, amountRC, msg.value);
     }
 
-    function sellReserveCoins(uint256 amountRC, address receiver, uint256 feeUI, address ui) external {
+    function sellReserveCoins(uint256 amountRC, address receiver, uint256 feeUI, address ui) external nonReentrant {
         require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellRC: insufficient RC balance");
         uint256 scP = scPrice(0);
         uint256 value = (amountRC * rcTargetPrice(scP, 0)) / rcDecimalScalingFactor;
@@ -137,7 +138,7 @@ contract Djed {
         emit SoldReserveCoins(msg.sender, receiver, amountRC, amountBC);
     }
 
-    function sellBothCoins(uint256 amountSC, uint256 amountRC, address receiver, uint256 feeUI, address ui) external {
+    function sellBothCoins(uint256 amountSC, uint256 amountRC, address receiver, uint256 feeUI, address ui) external nonReentrant {
         require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellBoth: insufficient SCs");
         require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellBoth: insufficient RCs");
         uint256 scP = scPrice(0);
