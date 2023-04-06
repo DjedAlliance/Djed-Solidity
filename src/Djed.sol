@@ -108,7 +108,7 @@ contract Djed {
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellSC: receiving zero BCs");
         stableCoin.burn(msg.sender, amountSC);
-        payable(receiver).transfer(amountBC);
+        transfer(receiver, amountBC);
         emit SoldStableCoins(msg.sender, receiver, amountSC, amountBC);
     }
 
@@ -132,7 +132,7 @@ contract Djed {
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellRC: receiving zero BCs");
         reserveCoin.burn(msg.sender, amountRC);
-        payable(receiver).transfer(amountBC);
+        transfer(receiver, amountBC);
         require(isRatioAboveMin(scPrice(0)), "sellRC: ratio below min");
         emit SoldReserveCoins(msg.sender, receiver, amountRC, amountBC);
     }
@@ -149,7 +149,7 @@ contract Djed {
         reserveCoin.burn(msg.sender, amountRC);
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellBoth: receiving zero BCs");
-        payable(receiver).transfer(amountBC);
+        transfer(receiver, amountBC);
         require(R(0) * preL >= preR * L(scPrice(0)), "sellBoth: ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
         emit SoldBothCoins(msg.sender, receiver, amountSC, amountRC, amountBC);
     }
@@ -161,9 +161,9 @@ contract Djed {
         uint256 fUI = (value * feeUI) / scalingFactor;
         uint256 fT = (value * treasuryFee()) / scalingFactor;
         treasuryRevenue += fT;
-        payable(treasury).transfer(fT);
-        payable(ui).transfer(fUI);
-        // payable(address(this)).transfer(f); // this happens implicitly, and thus `f` is effectively transfered to the reserve.
+        transfer(treasury, fT);
+        transfer(ui, fUI);
+        // transfer(address(this), f); // this happens implicitly, and thus `f` is effectively transfered to the reserve.
         return value - f - fUI - fT; // amountBC
     }
 
@@ -211,5 +211,10 @@ contract Djed {
         return reserveCoin.totalSupply() == 0
                 ? rcMinPrice
                 : Math.max(rcTargetPrice(_scPrice, _currentPaymentAmount), rcMinPrice);
+    }
+
+    function transfer(address receiver, uint256 amount) internal {
+        (bool success, ) = payable(receiver).call{value: amount}("");
+        require(success, "Transfer failed.");
     }
 }
