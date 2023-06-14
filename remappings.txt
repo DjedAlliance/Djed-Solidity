@@ -2,3 +2,4 @@ ds-test/=lib/ds-test/src/
 solmate/=lib/solmate/src/
 forge-std/=lib/forge-std/src/
 @openzeppelin/=lib/openzeppelin-contracts/
+airnode-protocol-v1/=lib/airnode-protocol-v1/contracts/
