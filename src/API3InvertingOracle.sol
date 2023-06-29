@@ -22,7 +22,7 @@ contract API3InvertingOracle {
         (int224 value, ) = IProxy(proxyAddress).read();
 
         require(value >= 0, "Cannot convert negative value");
-        require(value < DJED_DECIMALS / ADDITIONAL_DECIMALS_PRECISION, "value returned has higher precision");
+        require((uint256(int256(value))) < (DJED_DECIMALS / ADDITIONAL_DECIMALS_PRECISION), "value returned has higher precision");
         return DJED_DECIMALS / (uint256(int256(value)) * ADDITIONAL_DECIMALS_PRECISION);
     }
 }
