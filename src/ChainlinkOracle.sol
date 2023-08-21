@@ -6,13 +6,11 @@ import "./IOracle.sol";
 
 contract ChainlinkOracle is IOracle {
     AggregatorV3Interface internal dataFeed;
-    uint256 public immutable linkDecimals;
     uint256 public immutable decimals;
 
-    constructor(address _dataFeedAddress, uint256 _linkDecimals, uint256 _decimals) {
+    constructor(address _dataFeedAddress, uint256 _decimals) {
 
         dataFeed = AggregatorV3Interface(_dataFeedAddress);
-        linkDecimals = _linkDecimals;
         decimals = _decimals;
     }
 
@@ -20,8 +18,9 @@ contract ChainlinkOracle is IOracle {
 
     function readData() external view returns (uint256) {
 
+        uint8 chainlinkDecimals = dataFeed.decimals();
         (, int answer,,,) = dataFeed.latestRoundData();
         require(answer >= 0, "Cannot convert negative value");
-        return (uint256(int256(answer)) * decimals / linkDecimals);
+        return (uint256(int256(answer)) * (10 ** decimals) / (10 ** uint256(chainlinkDecimals)));
     }
 }

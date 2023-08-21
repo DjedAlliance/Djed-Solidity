@@ -11,5 +11,5 @@ fi
 
 
 forge create --legacy --rpc-url ${RPC_URL} \
-    --constructor-args  ${DATA_FEED_ADDRESS} ${LINK_DECIMALS} ${DJED_DECIMALS} \
+    --constructor-args  ${DATA_FEED_ADDRESS} ${DJED_DECIMALS} \
     --private-key ${PRIVATE_KEY} src/ChainlinkInvertingOracle.sol:ChainlinkInvertingOracle
