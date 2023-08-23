@@ -11,7 +11,7 @@ contract ChainlinkInvertingOracle is IOracle{
     constructor(address _dataFeedAddress, uint256 _decimals) {
 
         dataFeed = AggregatorV3Interface(_dataFeedAddress);
-        scalingFactor = (uint256(dataFeed.decimals())) * _decimals;
+        scalingFactor = 10 ** (uint256(dataFeed.decimals())) * _decimals;
     }
 
     function acceptTermsOfService() external {}
@@ -20,7 +20,7 @@ contract ChainlinkInvertingOracle is IOracle{
         (, int answer,,,) = dataFeed.latestRoundData();
 
         require(answer >= 0, "Cannot convert negative value");
-        require((uint256(int256(answer))) < (10 ** scalingFactor), "value returned has higher precision");
-        return (10 ** scalingFactor) / uint256(int256(answer));
+        require((uint256(int256(answer))) < (scalingFactor), "value returned has higher precision");
+        return (scalingFactor) / uint256(int256(answer));
     }
 }
