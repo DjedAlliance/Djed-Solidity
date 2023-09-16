@@ -9,7 +9,6 @@ contract ChainlinkOracle is IOracle {
     uint256 public immutable scalingFactor;
 
     constructor(address _dataFeedAddress, uint256 _decimals) {
-
         dataFeed = AggregatorV3Interface(_dataFeedAddress);
         scalingFactor = 10 ** (_decimals - uint256(dataFeed.decimals()));
     }
@@ -19,7 +18,6 @@ contract ChainlinkOracle is IOracle {
     function readData() external view returns (uint256) {
 
         (, int answer,,,) = dataFeed.latestRoundData();
-        require(answer >= 0, "Cannot convert negative value");
         return (uint256(int256(answer)) * scalingFactor);
     }
 }
