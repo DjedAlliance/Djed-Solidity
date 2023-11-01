@@ -5,22 +5,17 @@ import "@api3dao/contracts/v0.7/interfaces/IProxy.sol";
 
 contract API3Oracle {
     address public immutable proxyAddress;
-    uint256 public immutable api3Decimals;
-    uint256 public immutable decimals;
+    uint256 public immutable scalingFactor;
 
     constructor(address _proxyAddress, uint256 _api3Decimals, uint256 _decimals) {
-
         proxyAddress = _proxyAddress;
-        api3Decimals = _api3Decimals;
-        decimals = _decimals;
+        scalingFactor = 10 ** (_decimals - _api3Decimals);
     }
 
     function acceptTermsOfService() external {}
 
     function readData() external view returns (uint256) {
         (int224 value, ) = IProxy(proxyAddress).read();
-
-        require(value >= 0, "Cannot convert negative value");
-        return (uint256(int256(value)) * decimals / api3Decimals);
+        return (uint256(int256(value)) * scalingFactor);
     }
 }
