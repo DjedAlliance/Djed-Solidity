@@ -17,6 +17,7 @@ contract Utilities {
     uint256 constant RESERVE_RATIO_MAX = (SCALING_FACTOR * 170) / 100;
     uint256 constant FEE = (1 * SCALING_FACTOR) / 100; // 1 %
     uint256 constant RESERVE_COIN_WHOLE_MINIMUM_PRICE = 1e18;
+    uint256 constant RESERVE_COIN_WHOLE_INITIAL_PRICE = 1e20;
     uint256 THRESHOLD_NUMBER_SC = 1e6;
     uint256 TX_LIMIT = 200e6; // 200 SC
 

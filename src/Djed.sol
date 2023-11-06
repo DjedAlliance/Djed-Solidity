@@ -23,6 +23,7 @@ contract Djed is ReentrancyGuard {
     uint256 public immutable fee;
     uint256 public immutable thresholdSupplySC;
     uint256 public immutable rcMinPrice;
+    uint256 public immutable rcInitialPrice;
     uint256 public immutable txLimit;
 
     // Scaling factors:
@@ -40,7 +41,7 @@ contract Djed is ReentrancyGuard {
         address oracleAddress, uint256 _scalingFactor,
         address _treasury, uint256 _initialTreasuryFee, uint256 _treasuryRevenueTarget,
         uint256 _reserveRatioMin, uint256 _reserveRatioMax,
-        uint256 _fee, uint256 _thresholdSupplySC, uint256 _rcMinPrice, uint256 _txLimit
+        uint256 _fee, uint256 _thresholdSupplySC, uint256 _rcMinPrice, uint256 _rcInitialPrice, uint256 _txLimit
     ) payable {
         stableCoin = new Coin("StableCoin", "SC");
         reserveCoin = new Coin("ReserveCoin", "RC");
@@ -57,6 +58,7 @@ contract Djed is ReentrancyGuard {
         fee = _fee;
         thresholdSupplySC = _thresholdSupplySC;
         rcMinPrice = _rcMinPrice;
+        rcInitialPrice = _rcInitialPrice;
         txLimit = _txLimit;
 
         oracle = IOracle(oracleAddress);
@@ -211,7 +213,7 @@ contract Djed is ReentrancyGuard {
     function rcBuyingPrice(uint256 _scPrice, uint256 _currentPaymentAmount) internal view returns (uint256) {
         return reserveCoin.totalSupply() == 0
                 ? rcMinPrice
-                : Math.max(rcTargetPrice(_scPrice, _currentPaymentAmount), rcMinPrice);
+                : Math.max(rcTargetPrice(_scPrice, _currentPaymentAmount), rcInitialPrice);
     }
 
     function transfer(address receiver, uint256 amount) internal {

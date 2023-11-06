@@ -26,6 +26,7 @@ contract DjedTest is CTest, Utilities {
             FEE,
             THRESHOLD_NUMBER_SC,
             RESERVE_COIN_WHOLE_MINIMUM_PRICE,
+            RESERVE_COIN_WHOLE_INITIAL_PRICE,
             TX_LIMIT
         );
         cheats.deal(account1, 100 ether);
