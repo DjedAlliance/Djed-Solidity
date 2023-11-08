@@ -212,8 +212,8 @@ contract Djed is ReentrancyGuard {
 
     function rcBuyingPrice(uint256 _scPrice, uint256 _currentPaymentAmount) internal view returns (uint256) {
         return reserveCoin.totalSupply() == 0
-                ? rcMinPrice
-                : Math.max(rcTargetPrice(_scPrice, _currentPaymentAmount), rcInitialPrice);
+                ? rcInitialPrice
+                : Math.max(rcTargetPrice(_scPrice, _currentPaymentAmount), rcMinPrice);
     }
 
     function transfer(address receiver, uint256 amount) internal {
