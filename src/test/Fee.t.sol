@@ -308,7 +308,7 @@ contract FeeTest is CTest, Utilities {
         assertTrue(djed.stableCoin().totalSupply() >= THRESHOLD_NUMBER_SC);
         assertTrue(isRatioBelowMax(nSC, reserve));
 
-        buyAmount = 1e14;
+        buyAmount = 1e16;
 
         cheats.prank(account1);
         djed.buyReserveCoins{value: buyAmount}(account3, UI_FEE, UI_DEVELOPER); // 1 ADA
