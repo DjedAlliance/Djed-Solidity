@@ -186,7 +186,7 @@ contract TransactionLimitTest is CTest, Utilities {
          * Equivalent SC = 1.98 (n * rcPrice / scPrice)
          */
 
-        assertEq(djed.reserveCoin().balanceOf(account1), 0.99 * 1e6);
+        assertEq(djed.reserveCoin().balanceOf(account1), 0.99 * 1e4);
     }
 
     function testCannotBuyReserveCoinsAboveTxLimit() public {
@@ -248,7 +248,7 @@ contract TransactionLimitTest is CTest, Utilities {
          * Equivalent SC = 1.98 (n * rcPrice / scPrice)
          */
 
-        assertEq(djed.reserveCoin().balanceOf(account1), 0.99 * 1e6);
+        assertEq(djed.reserveCoin().balanceOf(account1), 0.99 * 1e4);
 
         // Selling 5 SC to increase Reserve Ratio (Decrease Reserve by 2.5)
         cheats.prank(account1);
@@ -274,7 +274,7 @@ contract TransactionLimitTest is CTest, Utilities {
          */
 
         cheats.prank(account1);
-        djed.sellReserveCoins(0.48 * 1e6, account1, 0, address(0));
+        djed.sellReserveCoins(0.48 * 1e4, account1, 0, address(0));
     }
 
     function testCannotSellReserveCoinsBelowTxLimit() public {
@@ -304,7 +304,7 @@ contract TransactionLimitTest is CTest, Utilities {
          * Equivalent SC = 1.98 (n * rcPrice / scPrice)
          */
 
-        assertEq(djed.reserveCoin().balanceOf(account1), 0.99 * 1e6);
+        assertEq(djed.reserveCoin().balanceOf(account1), 0.99 * 1e4);
 
         // Selling 5 SC to increase Reserve Ratio (Decrease Reserve by 2.5)
         cheats.prank(account1);
@@ -331,6 +331,6 @@ contract TransactionLimitTest is CTest, Utilities {
 
         cheats.prank(account1);
         cheats.expectRevert("sellRC: tx limit exceeded");
-        djed.sellReserveCoins(0.49 * 1e6, account1, 0, address(0));
+        djed.sellReserveCoins(0.49 * 1e4, account1, 0, address(0));
     }
 }

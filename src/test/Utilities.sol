@@ -102,7 +102,7 @@ contract Utilities {
         uint256 reserve
     ) internal pure returns (uint256) {
         if (nRC == 0) {
-            return RESERVE_COIN_WHOLE_MINIMUM_PRICE;
+            return RESERVE_COIN_WHOLE_INITIAL_PRICE;
         } else {
             return
                 Math.max(
