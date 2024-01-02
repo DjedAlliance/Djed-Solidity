@@ -2,18 +2,18 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
+import "./Helper.sol";
 import {ChainlinkOracle} from "../src/ChainlinkOracle.sol";
 
-contract DeployReceiver is Script {
-    function run() external {
+contract DeployChainlinkOracle is Script, Helper {
+    function run(SupportedNetworks network) external {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
-        address _dataFeedAddress = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
-        uint256 _decimals = 6;
+        (, address chainlinkDataFeed, ) = getConfigFromNetwork(network);
 
         vm.startBroadcast(senderPrivateKey);
 
         ChainlinkOracle chainlinkOracle = new ChainlinkOracle(
-            _dataFeedAddress, _decimals
+            chainlinkDataFeed, DJED_DECIMALS
         );
 
         console.log(
