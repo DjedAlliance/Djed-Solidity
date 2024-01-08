@@ -10,7 +10,21 @@ contract DeployDjed is Script, Helper {
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(senderPrivateKey);
-        (address chainlinkOracle,, address treasuryAddress) = getConfigFromNetwork(network);
+        (
+            address chainlinkOracle,
+            address treasuryAddress,
+            uint256 SCALING_FACTOR,
+            uint256 INITIAL_TREASURY_FEE,
+            uint256 TREASURY_REVENUE_TARGET,
+            uint256 RESERVE_RATIO_MIN,
+            uint256 RESERVE_RATIO_MAX,
+            uint256 FEE,
+            uint256 THREASHOLD_SUPPLY_SC,
+            uint256 RESERVE_COIN_MINIMUM_PRICE,
+            uint256 RESERVE_COIN_INITIAL_PRICE,
+            uint256 TX_LIMIT
+        ) = getConfigFromNetwork(network);
+
         Djed djed = new Djed(
             chainlinkOracle,
             SCALING_FACTOR,
