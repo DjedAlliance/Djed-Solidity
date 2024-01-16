@@ -4,7 +4,7 @@ For example, the file `scripts/env/deployDjedContract/milkomeda.env` contain the
 
 To run a deployment script, create an `.env` file with the help of `scripts/env/deployDjedContract/empty.env` and run the following --
  ```shell
-forge script ./scripts/deployDjedContract.s.sol:DeployDjed -vvv --broadcast --rpc-url <NETWORK_RPC_ENDPOINT> --sig "run(uint8)" -- <SupportedNetworks_ID>
+forge script ./scripts/deployDjedContract.s.sol:DeployDjed -vvvv --broadcast --rpc-url <NETWORK_RPC_ENDPOINT> --sig "run(uint8)" -- <SupportedNetworks_ID> --verify
 ```
 
 Refer `foundry.toml` for NETWORK_RPC_ENDPOINT and `scripts/Helper.sol` for SupportedNetworks_ID
