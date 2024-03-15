@@ -1,5 +1,7 @@
 # Djed
 
+[![CI](https://github.com/DjedAlliance/Djed-Solidity/actions/workflows/CI.yml/badge.svg)](https://github.com/DjedAlliance/Djed-Solidity/actions/workflows/CI.yml)
+
 Djed is a formally verified crypto-backed autonomous stablecoin protocol. To learn more, visit the [Djed Alliance's Website](http://www.djed.one).
 
 ## Setting Up
