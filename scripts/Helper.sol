@@ -22,7 +22,8 @@ contract Helper {
     uint256 public RESERVE_COIN_INITIAL_PRICE;
     uint256 public TX_LIMIT;
 
-    address chainlinkOracle;
+    address constant CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS = 0xB9C050Fd340aD5ED3093F31aAFAcC3D779f405f4;
+    address oracleAddress;
     address treasuryAddress;
 
     constructor() {
@@ -40,7 +41,7 @@ contract Helper {
         )
     {
         if (network == SupportedNetworks.ETHEREUM_SEPOLIA) {
-            chainlinkOracle = 0x7609Da7a13b5feD98d5D79463dA6C7a57d1E8a84;
+            oracleAddress = CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS;
             treasuryAddress = 0x0f5342B55ABCC0cC78bdB4868375bCA62B6c16eA;
             SCALING_FACTOR=1000000000000000000000000;
             INITIAL_TREASURY_FEE=2500000000000000000000;
@@ -54,23 +55,10 @@ contract Helper {
             TX_LIMIT=10000000000;
 
 
-        } else if (network == SupportedNetworks.MILKOMEDA_TESTNET) {
-            chainlinkOracle = 0x0000000000000000000000000000000000000000;
-            treasuryAddress = 0x3AA00B7aCF12CbcA5044d11E588E7fb1a5aa5A84;
-            SCALING_FACTOR=1000000000000000000000000;
-            INITIAL_TREASURY_FEE=2500000000000000000000;
-            TREASURY_REVENUE_TARGET=10000000000000000000000000;
-            RESERVE_RATIO_MIN=4000000000000000000000000;
-            RESERVE_RATIO_MAX=8000000000000000000000000;
-            FEE=15000000000000000000000;
-            THREASHOLD_SUPPLY_SC=500000000000;
-            RESERVE_COIN_MINIMUM_PRICE=1000000000000000000;
-            RESERVE_COIN_INITIAL_PRICE=100000000000000000000;
-            TX_LIMIT=10000000000;
-        } 
+        }
 
         return (
-            chainlinkOracle,
+            oracleAddress,
             treasuryAddress,
             SCALING_FACTOR,
             INITIAL_TREASURY_FEE,

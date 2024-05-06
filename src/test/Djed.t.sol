@@ -165,12 +165,11 @@ contract DjedTest is CTest, Utilities {
         uint256 scBalanceBefore = djed.stableCoin().balanceOf(account1);
         uint256 rcBalanceBefore = djed.reserveCoin().balanceOf(account1);
 
-        cheats.expectRevert( "sellBoth: insufficient SCs");
+        cheats.expectRevert("sellBoth: insufficient SCs");
         djed.sellBothCoins(scBalanceBefore + 1, 0, account1, 0, address(0));
 
-
         cheats.prank(account1);
-        cheats.expectRevert( "sellBoth: insufficient RCs");
+        cheats.expectRevert("sellBoth: insufficient RCs");
         djed.sellBothCoins(0, rcBalanceBefore + 1, account1, 0, address(0));
     }
 
