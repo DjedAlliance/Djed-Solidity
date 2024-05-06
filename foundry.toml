@@ -2,7 +2,9 @@
 src = 'src'
 out = 'out'
 libs = ['node_modules', 'lib']
-
+remappings = [
+    '@chainlink/contracts/=node_modules/@chainlink/contracts'
+]
 [rpc_endpoints]
 ethereumSepolia = "${ETHEREUM_SEPOLIA_RPC_URL}"
 milkomedaTestnet = "${MILKOMEDA_TESTNET_RPC_URL}"

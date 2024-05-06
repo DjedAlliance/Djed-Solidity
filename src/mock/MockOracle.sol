@@ -7,7 +7,10 @@ contract MockOracle {
     mapping(address => bool) public acceptedTermsOfService;
 
     modifier onlyAcceptedTermsOfService() {
-        require(acceptedTermsOfService[msg.sender], "Terms of service are not accepted");
+        require(
+            acceptedTermsOfService[msg.sender],
+            "Terms of service are not accepted"
+        );
         _;
     }
 
@@ -15,7 +18,12 @@ contract MockOracle {
         exchangeRate = _exchangeRate;
     }
 
-    function readData() external view onlyAcceptedTermsOfService returns (uint256) {
+    function readData()
+        external
+        view
+        onlyAcceptedTermsOfService
+        returns (uint256)
+    {
         return exchangeRate;
     }
 

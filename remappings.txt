@@ -1,6 +1,6 @@
-ds-test/=lib/ds-test/src/
+ds-test/=lib/forge-std/lib/ds-test/src/
 solmate/=lib/solmate/src/
 forge-std/=lib/forge-std/src/
 @openzeppelin/=lib/openzeppelin-contracts/
 @api3dao=lib/contracts/
-@chainlink=lib/chainlink-brownie-contracts/
+@chainlink/contracts/=node_modules/@chainlink/contracts
