@@ -31,51 +31,17 @@ contract Djed is ReentrancyGuard {
     uint256 public immutable scDecimalScalingFactor;
     uint256 public immutable rcDecimalScalingFactor;
 
-    event BoughtStableCoins(
-        address indexed buyer,
-        address indexed receiver,
-        uint256 amountSC,
-        uint256 amountBC
-    );
-    event SoldStableCoins(
-        address indexed seller,
-        address indexed receiver,
-        uint256 amountSC,
-        uint256 amountBC
-    );
-    event BoughtReserveCoins(
-        address indexed buyer,
-        address indexed receiver,
-        uint256 amountRC,
-        uint256 amountBC
-    );
-    event SoldReserveCoins(
-        address indexed seller,
-        address indexed receiver,
-        uint256 amountRC,
-        uint256 amountBC
-    );
-    event SoldBothCoins(
-        address indexed seller,
-        address indexed receiver,
-        uint256 amountSC,
-        uint256 amountRC,
-        uint256 amountBC
-    );
+    event BoughtStableCoins(address indexed buyer, address indexed receiver, uint256 amountSC, uint256 amountBC);
+    event SoldStableCoins(address indexed seller, address indexed receiver, uint256 amountSC, uint256 amountBC);
+    event BoughtReserveCoins(address indexed buyer, address indexed receiver, uint256 amountRC, uint256 amountBC);
+    event SoldReserveCoins(address indexed seller, address indexed receiver, uint256 amountRC, uint256 amountBC);
+    event SoldBothCoins(address indexed seller, address indexed receiver, uint256 amountSC, uint256 amountRC, uint256 amountBC);
 
     constructor(
-        address oracleAddress,
-        uint256 _scalingFactor,
-        address _treasury,
-        uint256 _initialTreasuryFee,
-        uint256 _treasuryRevenueTarget,
-        uint256 _reserveRatioMin,
-        uint256 _reserveRatioMax,
-        uint256 _fee,
-        uint256 _thresholdSupplySC,
-        uint256 _rcMinPrice,
-        uint256 _rcInitialPrice,
-        uint256 _txLimit
+        address oracleAddress, uint256 _scalingFactor,
+        address _treasury, uint256 _initialTreasuryFee, uint256 _treasuryRevenueTarget,
+        uint256 _reserveRatioMin, uint256 _reserveRatioMax,
+        uint256 _fee, uint256 _thresholdSupplySC, uint256 _rcMinPrice, uint256 _rcInitialPrice, uint256 _txLimit
     ) payable {
         stableCoin = new Coin("StableCoin", "SC");
         reserveCoin = new Coin("ReserveCoin", "RC");
@@ -112,11 +78,7 @@ contract Djed is ReentrancyGuard {
         return L(scPrice(0));
     }
 
-    function E(uint256 _scPrice, uint256 _currentPaymentAmount)
-        internal
-        view
-        returns (uint256)
-    {
+    function E(uint256 _scPrice, uint256 _currentPaymentAmount) internal view returns (uint256) {
         return R(_currentPaymentAmount) - L(_scPrice);
     }
 
@@ -125,43 +87,25 @@ contract Djed is ReentrancyGuard {
     }
 
     function ratio() external view returns (uint256) {
-        return (scalingFactor * R(0)) / L(scPrice(0));
+        return scalingFactor * R(0) / L(scPrice(0));
     }
 
     // # Public Trading Functions:
 
-    function buyStableCoins(
-        address receiver,
-        uint256 feeUI,
-        address ui
-    ) external payable nonReentrant {
+    function buyStableCoins(address receiver, uint256 feeUI, address ui) external payable nonReentrant {
         uint256 scP = scPrice(msg.value);
         uint256 amountBC = deductFees(msg.value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         uint256 amountSC = (amountBC * scDecimalScalingFactor) / scP;
-        require(
-            amountSC <= txLimit || stableCoin.totalSupply() < thresholdSupplySC,
-            "buySC: tx limit exceeded"
-        );
+        require(amountSC <= txLimit || stableCoin.totalSupply() < thresholdSupplySC, "buySC: tx limit exceeded");
         require(amountSC > 0, "buySC: receiving zero SCs");
         stableCoin.mint(receiver, amountSC);
         require(isRatioAboveMin(scPrice(0)), "buySC: ratio below min");
         emit BoughtStableCoins(msg.sender, receiver, amountSC, msg.value);
     }
 
-    function sellStableCoins(
-        uint256 amountSC,
-        address receiver,
-        uint256 feeUI,
-        address ui
-    ) external nonReentrant {
-        require(
-            stableCoin.balanceOf(msg.sender) >= amountSC,
-            "sellSC: insufficient SC balance"
-        );
-        require(
-            amountSC <= txLimit || stableCoin.totalSupply() < thresholdSupplySC,
-            "sellSC: tx limit exceeded"
-        );
+    function sellStableCoins(uint256 amountSC, address receiver, uint256 feeUI, address ui) external nonReentrant {
+        require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellSC: insufficient SC balance");
+        require(amountSC <= txLimit || stableCoin.totalSupply() < thresholdSupplySC, "sellSC: tx limit exceeded");
         uint256 scP = scPrice(0);
         uint256 value = (amountSC * scP) / scDecimalScalingFactor;
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
@@ -171,48 +115,23 @@ contract Djed is ReentrancyGuard {
         emit SoldStableCoins(msg.sender, receiver, amountSC, amountBC);
     }
 
-    function buyReserveCoins(
-        address receiver,
-        uint256 feeUI,
-        address ui
-    ) external payable nonReentrant {
+    function buyReserveCoins(address receiver, uint256 feeUI, address ui) external payable nonReentrant {
         uint256 scP = scPrice(msg.value);
         uint256 rcBP = rcBuyingPrice(scP, msg.value);
         uint256 amountBC = deductFees(msg.value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
-        require(
-            amountBC <= (txLimit * scP) / scDecimalScalingFactor ||
-                stableCoin.totalSupply() < thresholdSupplySC,
-            "buyRC: tx limit exceeded"
-        );
+        require(amountBC <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC, "buyRC: tx limit exceeded");
         uint256 amountRC = (amountBC * rcDecimalScalingFactor) / rcBP;
         require(amountRC > 0, "buyRC: receiving zero RCs");
         reserveCoin.mint(receiver, amountRC);
-        require(
-            isRatioBelowMax(scPrice(0)) ||
-                stableCoin.totalSupply() < thresholdSupplySC,
-            "buyRC: ratio above max"
-        );
+        require(isRatioBelowMax(scPrice(0)) || stableCoin.totalSupply() < thresholdSupplySC, "buyRC: ratio above max");
         emit BoughtReserveCoins(msg.sender, receiver, amountRC, msg.value);
     }
 
-    function sellReserveCoins(
-        uint256 amountRC,
-        address receiver,
-        uint256 feeUI,
-        address ui
-    ) external nonReentrant {
-        require(
-            reserveCoin.balanceOf(msg.sender) >= amountRC,
-            "sellRC: insufficient RC balance"
-        );
+    function sellReserveCoins(uint256 amountRC, address receiver, uint256 feeUI, address ui) external nonReentrant {
+        require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellRC: insufficient RC balance");
         uint256 scP = scPrice(0);
-        uint256 value = (amountRC * rcTargetPrice(scP, 0)) /
-            rcDecimalScalingFactor;
-        require(
-            value <= (txLimit * scP) / scDecimalScalingFactor ||
-                stableCoin.totalSupply() < thresholdSupplySC,
-            "sellRC: tx limit exceeded"
-        );
+        uint256 value = (amountRC * rcTargetPrice(scP, 0)) / rcDecimalScalingFactor;
+        require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC, "sellRC: tx limit exceeded");
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellRC: receiving zero BCs");
         reserveCoin.burn(msg.sender, amountRC);
@@ -221,52 +140,26 @@ contract Djed is ReentrancyGuard {
         emit SoldReserveCoins(msg.sender, receiver, amountRC, amountBC);
     }
 
-    function sellBothCoins(
-        uint256 amountSC,
-        uint256 amountRC,
-        address receiver,
-        uint256 feeUI,
-        address ui
-    ) external nonReentrant {
-        require(
-            stableCoin.balanceOf(msg.sender) >= amountSC,
-            "sellBoth: insufficient SCs"
-        );
-        require(
-            reserveCoin.balanceOf(msg.sender) >= amountRC,
-            "sellBoth: insufficient RCs"
-        );
+    function sellBothCoins(uint256 amountSC, uint256 amountRC, address receiver, uint256 feeUI, address ui) external nonReentrant {
+        require(stableCoin.balanceOf(msg.sender) >= amountSC, "sellBoth: insufficient SCs");
+        require(reserveCoin.balanceOf(msg.sender) >= amountRC, "sellBoth: insufficient RCs");
         uint256 scP = scPrice(0);
         uint256 preR = R(0);
         uint256 preL = L(scP);
-        uint256 value = (amountSC * scP) /
-            scDecimalScalingFactor +
-            (amountRC * rcTargetPrice(scP, 0)) /
-            rcDecimalScalingFactor;
-        require(
-            value <= (txLimit * scP) / scDecimalScalingFactor ||
-                stableCoin.totalSupply() < thresholdSupplySC,
-            "sellBoth: tx limit exceeded"
-        );
+        uint256 value = (amountSC * scP) / scDecimalScalingFactor + (amountRC * rcTargetPrice(scP, 0)) / rcDecimalScalingFactor;
+        require(value <= (txLimit * scP) / scDecimalScalingFactor || stableCoin.totalSupply() < thresholdSupplySC, "sellBoth: tx limit exceeded");
         stableCoin.burn(msg.sender, amountSC);
         reserveCoin.burn(msg.sender, amountRC);
         uint256 amountBC = deductFees(value, feeUI, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
         require(amountBC > 0, "sellBoth: receiving zero BCs");
         transfer(receiver, amountBC);
-        require(
-            R(0) * preL >= preR * L(scPrice(0)),
-            "sellBoth: ratio decreased"
-        ); // R(0)/L(scP) >= preR/preL, avoiding division by zero
+        require(R(0) * preL >= preR * L(scPrice(0)), "sellBoth: ratio decreased"); // R(0)/L(scP) >= preR/preL, avoiding division by zero
         emit SoldBothCoins(msg.sender, receiver, amountSC, amountRC, amountBC);
     }
 
     // # Auxiliary Functions
 
-    function deductFees(
-        uint256 value,
-        uint256 feeUI,
-        address ui
-    ) internal returns (uint256) {
+    function deductFees(uint256 value, uint256 feeUI, address ui) internal returns (uint256) {
         uint256 f = (value * fee) / scalingFactor;
         uint256 fUI = (value * feeUI) / scalingFactor;
         uint256 fT = (value * treasuryFee()) / scalingFactor;
@@ -278,92 +171,49 @@ contract Djed is ReentrancyGuard {
     }
 
     function isRatioAboveMin(uint256 _scPrice) internal view returns (bool) {
-        return
-            R(0) * scalingFactor * scDecimalScalingFactor >=
-            stableCoin.totalSupply() * _scPrice * reserveRatioMin;
+        return R(0) * scalingFactor * scDecimalScalingFactor >= stableCoin.totalSupply() * _scPrice * reserveRatioMin;
     }
 
     function isRatioBelowMax(uint256 _scPrice) internal view returns (bool) {
-        return
-            R(0) * scalingFactor * scDecimalScalingFactor <=
-            stableCoin.totalSupply() * _scPrice * reserveRatioMax;
+        return R(0) * scalingFactor * scDecimalScalingFactor <= stableCoin.totalSupply() * _scPrice * reserveRatioMax;
     }
 
     // Treasury Fee: starts as `initialTreasuryFee` and decreases linearly to 0 as the `treasuryRevenue` approaches the `treasuryRevenueTarget`
     function treasuryFee() public view returns (uint256) {
-        return
-            (treasuryRevenue >= treasuryRevenueTarget)
+        return (treasuryRevenue >= treasuryRevenueTarget)
                 ? 0
-                : initialTreasuryFee -
-                    ((initialTreasuryFee * treasuryRevenue) /
-                        treasuryRevenueTarget);
+                : initialTreasuryFee - ((initialTreasuryFee * treasuryRevenue) / treasuryRevenueTarget);
     }
 
     // # Price Functions: return the price in weis for 1 whole coin.
 
-    function scPrice(uint256 _currentPaymentAmount)
-        public
-        view
-        returns (uint256)
-    {
+    function scPrice(uint256 _currentPaymentAmount) public view returns (uint256) {
         uint256 scTargetPrice = oracle.readData();
         uint256 sSC = stableCoin.totalSupply();
-        return
-            sSC == 0
+        return sSC == 0
                 ? scTargetPrice
-                : Math.min(
-                    scTargetPrice,
-                    (R(_currentPaymentAmount) * scDecimalScalingFactor) / sSC
-                );
+                : Math.min(scTargetPrice, (R(_currentPaymentAmount) * scDecimalScalingFactor) / sSC);
     }
 
-    function rcTargetPrice(uint256 _currentPaymentAmount)
-        external
-        view
-        returns (uint256)
-    {
-        return
-            rcTargetPrice(
-                scPrice(_currentPaymentAmount),
-                _currentPaymentAmount
-            );
+    function rcTargetPrice(uint256 _currentPaymentAmount) external view returns (uint256) {
+        return rcTargetPrice(scPrice(_currentPaymentAmount), _currentPaymentAmount);
     }
 
-    function rcTargetPrice(uint256 _scPrice, uint256 _currentPaymentAmount)
-        internal
-        view
-        returns (uint256)
+    function rcTargetPrice(uint256 _scPrice, uint256 _currentPaymentAmount) internal view returns (uint256)
     {
         uint256 sRC = reserveCoin.totalSupply();
         require(sRC != 0, "RC supply is zero");
-        return
-            (E(_scPrice, _currentPaymentAmount) * rcDecimalScalingFactor) / sRC;
+        return (E(_scPrice, _currentPaymentAmount) * rcDecimalScalingFactor) / sRC;
     }
 
-    function rcBuyingPrice(uint256 _currentPaymentAmount)
-        external
-        view
-        returns (uint256)
-    {
-        return
-            rcBuyingPrice(
-                scPrice(_currentPaymentAmount),
-                _currentPaymentAmount
-            );
+    function rcBuyingPrice(uint256 _currentPaymentAmount) external view returns (uint256) {
+        return rcBuyingPrice(scPrice(_currentPaymentAmount), _currentPaymentAmount);
     }
 
-    function rcBuyingPrice(uint256 _scPrice, uint256 _currentPaymentAmount)
-        internal
-        view
-        returns (uint256)
-    {
-        return
-            reserveCoin.totalSupply() == 0
+    function rcBuyingPrice(uint256 _scPrice, uint256 _currentPaymentAmount) internal view returns (uint256) {
+        return reserveCoin.totalSupply() == 0
                 ? rcInitialPrice
-                : Math.max(
-                    rcTargetPrice(_scPrice, _currentPaymentAmount),
-                    rcMinPrice
-                );
+                : Math.max(rcTargetPrice(_scPrice, _currentPaymentAmount), rcMinPrice);
     }
 
     function transfer(address receiver, uint256 amount) internal {
