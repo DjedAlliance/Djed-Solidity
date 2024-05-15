@@ -7,11 +7,12 @@ import {Djed} from "../src/Djed.sol";
 
 contract DeployDjed is Script, Helper {
     function run(SupportedNetworks network) external {
+        uint256 INITIAL_BALANCE = 1e18;
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(senderPrivateKey);
         (
-            address chainlinkOracle,
+            address oracleAddress,
             address treasuryAddress,
             uint256 SCALING_FACTOR,
             uint256 INITIAL_TREASURY_FEE,
@@ -25,8 +26,8 @@ contract DeployDjed is Script, Helper {
             uint256 TX_LIMIT
         ) = getConfigFromNetwork(network);
 
-        Djed djed = new Djed(
-            chainlinkOracle,
+        Djed djed = new Djed{value: INITIAL_BALANCE}(
+            oracleAddress,
             SCALING_FACTOR,
             treasuryAddress,
             INITIAL_TREASURY_FEE,
