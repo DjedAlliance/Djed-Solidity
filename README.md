@@ -34,15 +34,13 @@ npm run prettier
 The `scripts/env/` folder contain sample .env files for different networks. To deploy an instance of djed contract, create an .env file with and run:
 
  ```shell
-forge script ./scripts/deployDjedContract.s.sol:DeployDjed -vvvv --broadcast --rpc-url <NETWORK_RPC_ENDPOINT> --sig "run(uint8)" -- <SupportedNetworks_ID> --verify
+forge script ./scripts/deployDjedContract.s.sol:DeployDjed -vvvv --broadcast --rpc-url <NETWORK_RPC_ENDPOINT> --sig "run(uint8)" -- <SupportedNetworks_ID> --verify --legacy
 ```
 
 Refer `foundry.toml` for NETWORK_RPC_ENDPOINT and `scripts/Helper.sol` for SupportedNetworks_ID. Update `scripts/Helper.sol` file with each Oracle deployments.
 
-To deploy chainlink oracle, run: 
+We can also deploy Inverting Chainlink Oracle (if chainlink oracle returns price feed from ETH/USD, the corresponding inverting oracle would return price feed from USD/ETH), run
 
  ```shell
-forge script ./scripts/deployChainlinkOracle.s.sol:DeployChainlinkOracle -vvvv --broadcast --rpc-url <NETWORK_RPC_ENDPOINT> --sig "run()" --verify
+forge script ./scripts/deployChainlinkOracle.s.sol:DeployChainlinkOracle -vvvv --broadcast --rpc-url <NETWORK_RPC_ENDPOINT> --sig "deploy2()" --verify --legacy
 ```
-
-We can also deploy Inverting Chainlink Oracle (if chainlink oracle returns price feed from ETH/USD, the corresponding inverting oracle would return price feed from USD/ETH), replace DeployChainlinkOracle with DeployInvertingChainlinkOracle in the above script. 

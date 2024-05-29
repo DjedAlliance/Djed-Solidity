@@ -10,13 +10,13 @@ contract ChainlinkOracle is IOracle {
 
     constructor(address _dataFeedAddress, uint256 _decimals) {
         dataFeed = AggregatorV3Interface(_dataFeedAddress);
-        scalingFactor = 10**(uint256(dataFeed.decimals()) - _decimals);
+        scalingFactor = 10**(_decimals - uint256(dataFeed.decimals()));
     }
 
     function acceptTermsOfService() external {}
 
     function readData() external view returns (uint256) {
         (, int256 answer, , , ) = dataFeed.latestRoundData();
-        return (uint256(int256(answer)) / scalingFactor);
+        return (scalingFactor / uint256(int256(answer)));
     }
 }

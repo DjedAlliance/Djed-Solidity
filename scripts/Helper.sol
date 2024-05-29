@@ -22,7 +22,7 @@ contract Helper {
     uint256 public RESERVE_COIN_INITIAL_PRICE;
     uint256 public TX_LIMIT;
 
-    address constant CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS = 0xB9C050Fd340aD5ED3093F31aAFAcC3D779f405f4;
+    address constant CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS = 0x0e62e7df0bA9d9142B980c329a2B111735c954B5;
     address oracleAddress;
     address treasuryAddress;
 
@@ -36,25 +36,33 @@ contract Helper {
     )
         internal
         returns (
-            address, address, 
-            uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256
+            address,
+            address,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256,
+            uint256
         )
     {
         if (network == SupportedNetworks.ETHEREUM_SEPOLIA) {
             oracleAddress = CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS;
             treasuryAddress = 0x0f5342B55ABCC0cC78bdB4868375bCA62B6c16eA;
-            SCALING_FACTOR=1000000000000000000000000;
-            INITIAL_TREASURY_FEE=2500000000000000000000;
-            TREASURY_REVENUE_TARGET=10000000000000000000000000;
-            RESERVE_RATIO_MIN=4000000000000000000000000;
-            RESERVE_RATIO_MAX=8000000000000000000000000;
-            FEE=15000000000000000000000;
-            THREASHOLD_SUPPLY_SC=500000000000;
-            RESERVE_COIN_MINIMUM_PRICE=1000000000000000000;
-            RESERVE_COIN_INITIAL_PRICE=100000000000000000000;
-            TX_LIMIT=10000000000;
-
-
+            SCALING_FACTOR = 1e24;
+            INITIAL_TREASURY_FEE = 1e18;
+            TREASURY_REVENUE_TARGET = 1e26;
+            RESERVE_RATIO_MIN = 4e24;
+            RESERVE_RATIO_MAX = 8e24;
+            FEE = 15e24;
+            THREASHOLD_SUPPLY_SC = 5e11;
+            RESERVE_COIN_MINIMUM_PRICE = 1e18;
+            RESERVE_COIN_INITIAL_PRICE = 1e20;
+            TX_LIMIT = 1e10;
         }
 
         return (
