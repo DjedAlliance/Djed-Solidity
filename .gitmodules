@@ -10,3 +10,6 @@
 [submodule "lib/contracts"]
 	path = lib/contracts
 	url = https://github.com/api3dao/contracts
+[submodule "lib/hebeswap-contract"]
+	path = lib/hebeswap-contract
+	url = https://github.com/HebePlatform/Oracle.git
