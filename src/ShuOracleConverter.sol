@@ -7,7 +7,7 @@ import "./IOracleShu.sol";
 contract ShuOracleConverter is IOracleShu {
     IOracle public oracle;
     uint8 public previousHour;
-    uint256 public contractDeploymentTime;
+    uint256 public lastTimestamp;
     uint256 public previousPrice;
     uint256 private _currentMaxPrice;
     uint256 private _currentMinPrice;
@@ -15,7 +15,6 @@ contract ShuOracleConverter is IOracleShu {
 
     constructor(address oracleAddress) {
         oracle = IOracle(oracleAddress);
-        contractDeploymentTime = block.timestamp;
         previousHour = 0;
         previousPrice = oracle.readData();
         _currentMaxPrice = previousPrice;
@@ -34,27 +33,22 @@ contract ShuOracleConverter is IOracleShu {
 
     function updateOracleValues() external {
         uint8 currentHour = _getHourDifference(block.timestamp);
-        if (currentHour > previousHour) {
+        if (currentHour != previousHour && lastTimestamp < block.timestamp) {
             for (uint8 i = previousHour; i < currentHour; i++) {
                 movingPrice[i] = previousPrice;
             }
             movingPrice[currentHour] = oracle.readData();
             previousPrice = movingPrice[currentHour];
             previousHour = currentHour;
+            lastTimestamp = block.timestamp;
             (_currentMinPrice, _currentMaxPrice) = _calculateMinMaxPrice();
         }
-    } // how to maker sure that _currentMaxPrice data has been updated before djedShu calls buy/sell functions.
+    }
 
-    function _getHourDifference(uint256 currentTime)
-        internal
-        view
-        returns (uint8)
-    {
-        return
-            uint8(
-                ((currentTime - contractDeploymentTime) / (1 hours)) %
-                    (24 hours)
-            );
+    function _getHourDifference(
+        uint256 currentTime
+    ) internal pure returns (uint8) {
+        return uint8((currentTime / (1 hours)) % 24);
     }
 
     function _calculateMinMaxPrice() internal view returns (uint256, uint256) {
