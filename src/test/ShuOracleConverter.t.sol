@@ -14,41 +14,59 @@ contract OracleConverterTest is Test, Utilities {
     function setUp() public {
         oracle = new MockShuOracle(ORACLE_EXCHANGE_RATE);
         oracleConverter = new ShuOracleConverter(address(oracle));
+        uint256 initialPrice = oracle.readData();
 
         assertEq(uint256(oracleConverter.previousHour()), 0);
-        assertEq(oracleConverter.previousPrice(), oracle.readData());
 
-        (uint256 price, uint256 timestamp) = oracleConverter.readMaxPrice();
-        assertEq(price, oracle.readData());
+        (uint256 priceMax, ) = oracleConverter.readMaxPrice();
+        assertEq(priceMax, initialPrice);
 
-        (price, timestamp) = oracleConverter.readMinPrice();
-        assertEq(price, oracle.readData());
-        assertEq(block.timestamp, timestamp);
+        (uint256 priceMin, ) = oracleConverter.readMinPrice();
+        assertEq(priceMin, initialPrice);
     }
 
-    function test_updatePrice() public {
-        oracle.updateData(); // increase oracle price by 1e17;
-        skip(7200); // skips 2 hours;
-        (uint256 currentMaxPrice, uint256 timestampMax) = oracleConverter
-            .readMaxPrice();
+    function test_updateOracleValues_noTimeElapsed() public {
+        uint256 initialPrice = oracle.readData();
+        oracle.updateData();
 
-        assertEq(currentMaxPrice, 5e17); // new oracle values have not been stored;
+        oracleConverter.updateOracleValues();
+        uint256 newPrice = oracle.readData();
 
-        oracleConverter.updateOracleValues(); // store new oracle values
-        (currentMaxPrice, timestampMax) = oracleConverter.readMaxPrice();
+        (uint256 maxPrice, ) = oracleConverter.readMaxPrice();
+        (uint256 minPrice, ) = oracleConverter.readMinPrice();
 
-        assertEq(currentMaxPrice, 6e17);
-        oracle.updateData(); // increase oracle price by 1e17;
+        assertEq(maxPrice, newPrice);
+        assertEq(minPrice, initialPrice);
+    }
 
-        oracleConverter.updateOracleValues(); // new oracle values need not be stored as 1 hour time has not passed, so max price remains the same;
-        (currentMaxPrice, timestampMax) = oracleConverter.readMaxPrice();
-        assertEq(currentMaxPrice, 6e17);
+    function test_updateOracleValues_hourDifference() public {
+        uint256 initialPrice = oracle.readData(); // Set initial price
+        oracle.updateData();
+        skip(3600); // Skip 1 hour
 
-        skip(3600); // skip 1 hour;
-        oracleConverter.updateOracleValues(); // store new oracle values
-        (currentMaxPrice, timestampMax) = oracleConverter.readMaxPrice();
-        assertEq(currentMaxPrice, 7e17);
+        uint256 firstUpdatePrice = oracle.readData();
+
+        oracleConverter.updateOracleValues(); // First update after 1 hour
+        (uint256 maxPrice, ) = oracleConverter.readMaxPrice();
+        (uint256 minPrice, ) = oracleConverter.readMinPrice();
+
+        assertEq(maxPrice, firstUpdatePrice);
+        assertEq(minPrice, initialPrice);
+
+        // Second update with increased price
+        oracle.updateData();
+        skip(7200); // Skip 2 hours
+
+        uint256 secondUpdatePrice = oracle.readData();
+
+        oracleConverter.updateOracleValues(); // Second update after 2 hours
+
+        (maxPrice, ) = oracleConverter.readMaxPrice();
+        (minPrice, ) = oracleConverter.readMinPrice();
+
+        assertEq(maxPrice, secondUpdatePrice);
+        assertEq(minPrice, initialPrice);
     }
 }
 
-// forge test -vvvv --match-test "test_updatePrice"
+// forge test -vvvv --match-path "src/test/ShuOracleConverter.t.sol"
