@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AEL
 pragma solidity ^0.8.0;
 
-import "@Oracle/IStdReference.sol";
+import "@hebeswap/IStdReference.sol";
 import "./IOracle.sol";
 
 contract HebeSwapInvertingOracle is IOracle {
