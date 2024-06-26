@@ -5,7 +5,8 @@ contract Helper {
     // Supported Networks
     enum SupportedNetworks {
         ETHEREUM_SEPOLIA,
-        MILKOMEDA_TESTNET
+        MILKOMEDA_TESTNET,
+        ETHEREUM_CLASSIC_MORDOR
     }
 
     mapping(SupportedNetworks enumValue => string humanReadableName)
@@ -23,12 +24,14 @@ contract Helper {
     uint256 public TX_LIMIT;
 
     address constant CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS = 0xB9C050Fd340aD5ED3093F31aAFAcC3D779f405f4;
+    address constant HEBESWAP_ORACLE_INVERTED_ADDRESS = 0xb0d99da21Bb4fa877e3D1DCA89E6657c5e840Eb2;
     address oracleAddress;
     address treasuryAddress;
 
     constructor() {
         networks[SupportedNetworks.ETHEREUM_SEPOLIA] = "Ethereum Sepolia";
         networks[SupportedNetworks.MILKOMEDA_TESTNET] = "Milkomeda C1 Testnet";
+        networks[SupportedNetworks.ETHEREUM_CLASSIC_MORDOR] = "Ethereum Classic Mordor";
     }
 
     function getConfigFromNetwork(
@@ -55,6 +58,21 @@ contract Helper {
             TX_LIMIT=10000000000;
 
 
+        }
+
+        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
+            oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS;
+            treasuryAddress = 0x078D888E40faAe0f32594342c85940AF3949E666;
+            SCALING_FACTOR=1000000000000000000000000;
+            INITIAL_TREASURY_FEE=2500000000000000000000;
+            TREASURY_REVENUE_TARGET=10000000000000000000000000;
+            RESERVE_RATIO_MIN=4000000000000000000000000;
+            RESERVE_RATIO_MAX=8000000000000000000000000;
+            FEE=15000000000000000000000;
+            THREASHOLD_SUPPLY_SC=500000000000;
+            RESERVE_COIN_MINIMUM_PRICE=1000000000000000000;
+            RESERVE_COIN_INITIAL_PRICE=100000000000000000000;
+            TX_LIMIT=10000000000;
         }
 
         return (

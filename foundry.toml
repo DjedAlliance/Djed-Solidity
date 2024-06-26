@@ -8,6 +8,7 @@ remappings = [
 [rpc_endpoints]
 ethereumSepolia = "${ETHEREUM_SEPOLIA_RPC_URL}"
 milkomedaTestnet = "${MILKOMEDA_TESTNET_RPC_URL}"
+ethereumClassicMordor = "${ETHEREUM_CLASSIC_MORDOR_RPC_URL}"
 
 [etherscan]
 ethereumSepolia = { key = "${ETHERSCAN_API_KEY}" }
