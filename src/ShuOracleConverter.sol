@@ -39,52 +39,54 @@ contract ShuOracleConverter is IOracleShu {
     }
 
     function updateOracleValues() external {
-        uint8 currentHour = _getHourDifference(block.timestamp);
+        uint8 currentHour = _getcurrentHour(block.timestamp);
         uint256 latestPrice = oracle.readData();
         movingPrice[currentHour] = latestPrice;
+        if (latestPrice < _currentMinPrice) {
+            _currentMinPrice = latestPrice;
+            _minIndex = currentHour;
+        }
 
+        if (latestPrice > _currentMaxPrice) {
+            _currentMaxPrice = latestPrice;
+            _maxIndex = currentHour;
+        }
         if (currentHour != previousHour && lastTimestamp < block.timestamp) {
             for (uint8 i = previousHour + 1; i < currentHour; i++) {
                 movingPrice[i] = latestPrice;
             }
             if (_ifUpdateMinMax(_minIndex, currentHour)) {
-                _calculateMinPrice();
+                _updateMinPrice();
             }
             if (_ifUpdateMinMax(_maxIndex, currentHour)) {
-                _calculateMaxPrice();
+                _updateMaxPrice();
             }
             previousHour = currentHour;
-        } else {
-            // currentMinPrice was due to the latestPrice in this hour. But now latestPrice changes and is no longer minPrice. should we recalculate minPrice now?
-            if (latestPrice < _currentMinPrice) {
-                _currentMinPrice = latestPrice;
-                _minIndex = currentHour;
-            }
-
-            if (latestPrice > _currentMaxPrice) {
-                _currentMaxPrice = latestPrice;
-                _maxIndex = currentHour;
-            }
         }
         lastTimestamp = block.timestamp;
     }
 
-    function _getHourDifference(
-        uint256 currentTime
-    ) internal pure returns (uint8) {
+    function _getcurrentHour(uint256 currentTime)
+        internal
+        pure
+        returns (uint8)
+    {
         return uint8((currentTime / (1 hours)) % 24);
     }
 
-    function _ifUpdateMinMax(uint8 index, uint8 currentHour) internal view returns (bool) {
-        if(previousHour <= currentHour) {
+    function _ifUpdateMinMax(uint8 index, uint8 currentHour)
+        internal
+        view
+        returns (bool)
+    {
+        if (previousHour <= currentHour) {
             return previousHour <= index && index <= currentHour;
-        }
-        else {
-            return index >= previousHour || index <= currentHour;
+        } else {
+            return previousHour <= index || index <= currentHour;
         }
     }
 
-    function _calculateMinPrice() internal {
+    function _updateMinPrice() internal {
         uint256 min = movingPrice[0];
 
         for (uint8 i = 1; i < 24; i++) {
@@ -96,7 +98,7 @@ contract ShuOracleConverter is IOracleShu {
         _currentMinPrice = min;
     }
 
-    function _calculateMaxPrice() internal {
+    function _updateMaxPrice() internal {
         uint256 max = movingPrice[0];
 
         for (uint8 i = 1; i < 24; i++) {

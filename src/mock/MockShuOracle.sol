@@ -12,8 +12,12 @@ contract MockShuOracle {
         return exchangeRate;
     }
 
-    function updateData() external {
+    function increasePrice() external {
         exchangeRate += 1e17;
+    }
+
+    function decreasePrice() external {
+        exchangeRate -= 1e17;
     }
 
     function acceptTermsOfService() external {}

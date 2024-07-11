@@ -16,7 +16,10 @@ contract OracleConverterTest is Test, Utilities {
         oracleConverter = new ShuOracleConverter(address(oracle));
         uint256 initialPrice = oracle.readData();
 
-        assertEq(uint256(oracleConverter.previousHour()), 0);
+        assertEq(
+            uint256(oracleConverter.previousHour()),
+            uint8((block.timestamp / (1 hours)) % 24)
+        );
 
         (uint256 priceMax, ) = oracleConverter.readMaxPrice();
         assertEq(priceMax, initialPrice);
@@ -27,7 +30,7 @@ contract OracleConverterTest is Test, Utilities {
 
     function test_updateOracleValues_noTimeElapsed() public {
         uint256 initialPrice = oracle.readData();
-        oracle.updateData();
+        oracle.increasePrice();
 
         oracleConverter.updateOracleValues();
         uint256 newPrice = oracle.readData();
@@ -39,33 +42,73 @@ contract OracleConverterTest is Test, Utilities {
         assertEq(minPrice, initialPrice);
     }
 
-    function test_updateOracleValues_hourDifference() public {
-        uint256 initialPrice = oracle.readData(); // Set initial price
-        oracle.updateData();
+    function test_updateOracleValues_mixedPriceChanges() public {
+        oracle.readData(); // Set initial price
+        oracle.increasePrice();
         skip(3600); // Skip 1 hour
 
         uint256 firstUpdatePrice = oracle.readData();
-
         oracleConverter.updateOracleValues(); // First update after 1 hour
+
+        oracle.decreasePrice();
+        skip(3600); // Skip another hour
+
+        oracle.readData();
+        oracleConverter.updateOracleValues(); // Second update after 1 hour
+
+        oracle.decreasePrice();
+        skip(3600); // Skip another hour
+
+        uint256 thirdUpdatePrice = oracle.readData();
+        oracleConverter.updateOracleValues(); // Third update after 1 hour
+
         (uint256 maxPrice, ) = oracleConverter.readMaxPrice();
         (uint256 minPrice, ) = oracleConverter.readMinPrice();
 
         assertEq(maxPrice, firstUpdatePrice);
-        assertEq(minPrice, initialPrice);
+        assertEq(minPrice, thirdUpdatePrice);
+    }
 
-        // Second update with increased price
-        oracle.updateData();
-        skip(7200); // Skip 2 hours
+    function test_updateOracleValues_multipleHours() public {
+        oracle.readData(); // Set initial price
+        oracle.increasePrice();
+        skip(3600 * 5); // Skip 5 hours
+
+        uint256 firstUpdatePrice = oracle.readData();
+        oracleConverter.updateOracleValues(); // First update after 5 hours
+
+        oracle.decreasePrice();
+        skip(3600 * 3); // Skip another 3 hours
 
         uint256 secondUpdatePrice = oracle.readData();
+        oracleConverter.updateOracleValues(); // Second update after 3 hours
 
-        oracleConverter.updateOracleValues(); // Second update after 2 hours
+        (uint256 maxPrice, ) = oracleConverter.readMaxPrice();
+        (uint256 minPrice, ) = oracleConverter.readMinPrice();
 
-        (maxPrice, ) = oracleConverter.readMaxPrice();
-        (minPrice, ) = oracleConverter.readMinPrice();
+        assertEq(maxPrice, firstUpdatePrice);
+        assertEq(minPrice, secondUpdatePrice);
+    }
 
-        assertEq(maxPrice, secondUpdatePrice);
-        assertEq(minPrice, initialPrice);
+    function test_updateOracleValues_daysPassed() public {
+        oracle.readData(); // Set initial price
+        oracle.increasePrice();
+        skip(3600 * 24 * 2); // Skip 2 days
+
+        uint256 firstUpdatePrice = oracle.readData();
+        oracleConverter.updateOracleValues(); // First update after 2 days
+
+        oracle.decreasePrice();
+        skip(3600 * 24); // Skip another day
+
+        uint256 secondUpdatePrice = oracle.readData();
+        oracleConverter.updateOracleValues(); // Second update after 1 day
+
+        (uint256 maxPrice, ) = oracleConverter.readMaxPrice();
+        (uint256 minPrice, ) = oracleConverter.readMinPrice();
+
+        assertEq(maxPrice, firstUpdatePrice);
+        assertEq(minPrice, secondUpdatePrice);
     }
 }
 
