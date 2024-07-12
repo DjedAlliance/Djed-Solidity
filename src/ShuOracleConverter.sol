@@ -6,11 +6,13 @@ import "./IOracle.sol";
 import "./IOracleShu.sol";
 
 contract ShuOracleConverter is IOracleShu {
+    uint8 public constant UPDATE_TIME_IN_HOUR = 24;
     IOracle public oracle;
     uint256 public lastTimestamp;
     uint256 private _currentMaxPrice;
     uint256 private _currentMinPrice;
-    uint256[24] public movingPrice;
+    uint256 private iterations = 0;
+    uint256[UPDATE_TIME_IN_HOUR] public movingPrice;
 
     uint8 public previousHour;
     uint8 private _minIndex;
@@ -20,7 +22,9 @@ contract ShuOracleConverter is IOracleShu {
         oracle = IOracle(oracleAddress);
         uint256 latestPrice = oracle.readData();
         lastTimestamp = block.timestamp;
-        previousHour = uint8((block.timestamp / (1 hours)) % 24);
+        previousHour = uint8(
+            (block.timestamp / (1 hours)) % UPDATE_TIME_IN_HOUR
+        );
         movingPrice[previousHour] = latestPrice;
         _currentMaxPrice = latestPrice;
         _currentMinPrice = latestPrice;
@@ -39,21 +43,29 @@ contract ShuOracleConverter is IOracleShu {
     }
 
     function updateOracleValues() external {
-        uint8 currentHour = _getcurrentHour(block.timestamp);
-        uint256 latestPrice = oracle.readData();
-        movingPrice[currentHour] = latestPrice;
-        if (latestPrice < _currentMinPrice) {
-            _currentMinPrice = latestPrice;
-            _minIndex = currentHour;
-        }
+        uint8 currentHour = uint8(
+            (block.timestamp / (1 hours)) % UPDATE_TIME_IN_HOUR
+        );
+        uint256 latestAveragePrice = (movingPrice[currentHour] *
+            iterations +
+            oracle.readData()) / ++iterations;
+        movingPrice[currentHour] = latestAveragePrice;
 
-        if (latestPrice > _currentMaxPrice) {
-            _currentMaxPrice = latestPrice;
+        if (latestAveragePrice < _currentMinPrice) {
+            _currentMinPrice = latestAveragePrice;
+            _minIndex = currentHour;
+        } else if (latestAveragePrice > _currentMaxPrice) {
+            _currentMaxPrice = latestAveragePrice;
             _maxIndex = currentHour;
         }
         if (currentHour != previousHour && lastTimestamp < block.timestamp) {
-            for (uint8 i = previousHour + 1; i < currentHour; i++) {
-                movingPrice[i] = latestPrice;
+            uint8 hourCount = (currentHour > previousHour)
+                ? currentHour - previousHour
+                : UPDATE_TIME_IN_HOUR + currentHour - previousHour;
+            for (uint8 i = 1; i < hourCount; i++) {
+                movingPrice[
+                    (previousHour + i) % UPDATE_TIME_IN_HOUR
+                ] = latestAveragePrice;
             }
             if (_ifUpdateMinMax(_minIndex, currentHour)) {
                 _updateMinPrice();
@@ -64,14 +76,6 @@ contract ShuOracleConverter is IOracleShu {
             previousHour = currentHour;
         }
         lastTimestamp = block.timestamp;
-    }
-
-    function _getcurrentHour(uint256 currentTime)
-        internal
-        pure
-        returns (uint8)
-    {
-        return uint8((currentTime / (1 hours)) % 24);
     }
 
     function _ifUpdateMinMax(uint8 index, uint8 currentHour)
@@ -87,24 +91,26 @@ contract ShuOracleConverter is IOracleShu {
     }
 
     function _updateMinPrice() internal {
-        uint256 min = movingPrice[0];
+        uint256 min = type(uint256).max;
 
-        for (uint8 i = 1; i < 24; i++) {
-            if (movingPrice[i] != 0 && movingPrice[i] < min) {
+        for (uint8 i = 0; i < UPDATE_TIME_IN_HOUR; i++) {
+            uint256 price = movingPrice[i];
+            if (price != 0 && price < min) {
                 _minIndex = i;
-                min = movingPrice[i];
+                min = price;
             }
         }
         _currentMinPrice = min;
     }
 
     function _updateMaxPrice() internal {
-        uint256 max = movingPrice[0];
+        uint256 max = 0;
 
-        for (uint8 i = 1; i < 24; i++) {
-            if (movingPrice[i] > max) {
+        for (uint8 i = 0; i < UPDATE_TIME_IN_HOUR; i++) {
+            uint256 price = movingPrice[i];
+            if (price > max) {
                 _maxIndex = i;
-                max = movingPrice[i];
+                max = price;
             }
         }
         _currentMaxPrice = max;

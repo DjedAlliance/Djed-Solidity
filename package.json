@@ -9,9 +9,9 @@
     "url": "git+https://github.com/DjedAlliance/Djed-Solidity.git"
   },
   "scripts": {
-    "prettier": "prettier --write 'src/**/*.sol' '!src/Djed.sol'",
-    "prettier:list": "prettier --list-different 'src/**/*.sol' '!src/Djed.sol'",
-    "prettier:check": "prettier --check 'src/**/*.sol' '!src/Djed.sol'",
+    "prettier": "prettier --write 'src/**/*.sol' '!src/Djed.sol' '!src/DjedShu.sol'",
+    "prettier:list": "prettier --list-different 'src/**/*.sol' '!src/Djed.sol' '!src/DjedShu.sol'",
+    "prettier:check": "prettier --check 'src/**/*.sol' '!src/Djed.sol' '!src/Djed.sol'",
     "solhint": "solhint --config ./.solhint.json 'src/**/*.sol' --fix",
     "solhint:check": "solhint --config ./.solhint.json 'src/**/*.sol'",
     "lint": "npm run prettier && npm run solhint",
