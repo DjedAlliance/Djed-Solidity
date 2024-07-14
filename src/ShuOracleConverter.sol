@@ -46,26 +46,14 @@ contract ShuOracleConverter is IOracleShu {
         uint8 currentHour = uint8(
             (block.timestamp / (1 hours)) % UPDATE_TIME_IN_HOUR
         );
-        uint256 latestAveragePrice = (movingPrice[currentHour] *
-            iterations +
-            oracle.readData()) / ++iterations;
-        movingPrice[currentHour] = latestAveragePrice;
-
-        if (latestAveragePrice < _currentMinPrice) {
-            _currentMinPrice = latestAveragePrice;
-            _minIndex = currentHour;
-        } else if (latestAveragePrice > _currentMaxPrice) {
-            _currentMaxPrice = latestAveragePrice;
-            _maxIndex = currentHour;
-        }
         if (currentHour != previousHour && lastTimestamp < block.timestamp) {
+            iterations = 0;
             uint8 hourCount = (currentHour > previousHour)
                 ? currentHour - previousHour
                 : UPDATE_TIME_IN_HOUR + currentHour - previousHour;
             for (uint8 i = 1; i < hourCount; i++) {
-                movingPrice[
-                    (previousHour + i) % UPDATE_TIME_IN_HOUR
-                ] = latestAveragePrice;
+                movingPrice[(previousHour + i) % UPDATE_TIME_IN_HOUR] = oracle
+                    .readData();
             }
             if (_ifUpdateMinMax(_minIndex, currentHour)) {
                 _updateMinPrice();
@@ -74,6 +62,21 @@ contract ShuOracleConverter is IOracleShu {
                 _updateMaxPrice();
             }
             previousHour = currentHour;
+        }
+
+        uint256 latestAveragePrice = (movingPrice[currentHour] *
+            iterations +
+            oracle.readData()) / (iterations + 1);
+        iterations++;
+
+        movingPrice[currentHour] = latestAveragePrice;
+
+        if (latestAveragePrice < _currentMinPrice) {
+            _currentMinPrice = latestAveragePrice;
+            _minIndex = currentHour;
+        } else if (latestAveragePrice > _currentMaxPrice) {
+            _currentMaxPrice = latestAveragePrice;
+            _maxIndex = currentHour;
         }
         lastTimestamp = block.timestamp;
     }
