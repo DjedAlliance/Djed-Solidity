@@ -9,14 +9,14 @@ contract ShuOracleConverter is IOracleShu {
     uint8 public constant UPDATE_TIME_IN_HOUR = 24;
     IOracle public oracle;
     uint256 public lastTimestamp;
-    uint256 private _currentMaxPrice;
-    uint256 private _currentMinPrice;
-    uint256 private iterations = 0;
+    uint256 private _maxPrice;
+    uint256 private _minPrice;
+    uint256 private _updatesSinceHourStart = 0;
     uint256[UPDATE_TIME_IN_HOUR] public movingPrice;
 
     uint8 public previousHour;
-    uint8 private _minIndex;
-    uint8 private _maxIndex;
+    uint8 private _minPriceIndex;
+    uint8 private _maxPriceIndex;
 
     constructor(address oracleAddress) {
         oracle = IOracle(oracleAddress);
@@ -25,63 +25,72 @@ contract ShuOracleConverter is IOracleShu {
         previousHour = uint8(
             (block.timestamp / (1 hours)) % UPDATE_TIME_IN_HOUR
         );
-        movingPrice[previousHour] = latestPrice;
-        _currentMaxPrice = latestPrice;
-        _currentMinPrice = latestPrice;
-        _minIndex = previousHour;
-        _maxIndex = previousHour;
+
+        for (uint8 i = 0; i < UPDATE_TIME_IN_HOUR; i++) {
+            movingPrice[i] = latestPrice;
+        }
+        _maxPrice = latestPrice;
+        _minPrice = latestPrice;
+        _minPriceIndex = previousHour;
+        _maxPriceIndex = previousHour;
     }
 
     function acceptTermsOfService() external {}
 
     function readMaxPrice() external view returns (uint256, uint256) {
-        return (_currentMaxPrice, block.timestamp);
+        return (_maxPrice, block.timestamp);
     }
 
     function readMinPrice() external view returns (uint256, uint256) {
-        return (_currentMinPrice, block.timestamp);
+        return (_minPrice, block.timestamp);
     }
 
     function updateOracleValues() external {
         uint8 currentHour = uint8(
             (block.timestamp / (1 hours)) % UPDATE_TIME_IN_HOUR
         );
-        if (currentHour != previousHour && lastTimestamp < block.timestamp) {
-            iterations = 0;
+        if (
+            currentHour != previousHour ||
+            (lastTimestamp + 1 days) == block.timestamp
+        ) {
+            _updatesSinceHourStart = 0;
             uint8 hourCount = (currentHour > previousHour)
                 ? currentHour - previousHour
                 : UPDATE_TIME_IN_HOUR + currentHour - previousHour;
+            uint256 latestPrice = oracle.readData();
+
             for (uint8 i = 1; i < hourCount; i++) {
-                movingPrice[(previousHour + i) % UPDATE_TIME_IN_HOUR] = oracle
-                    .readData();
+                movingPrice[
+                    (previousHour + i) % UPDATE_TIME_IN_HOUR
+                ] = latestPrice;
             }
-            if (_ifUpdateMinMax(_minIndex, currentHour)) {
+            if (_shouldUpdateMinMax(_minPriceIndex, currentHour)) {
                 _updateMinPrice();
             }
-            if (_ifUpdateMinMax(_maxIndex, currentHour)) {
+            if (_shouldUpdateMinMax(_maxPriceIndex, currentHour)) {
                 _updateMaxPrice();
             }
             previousHour = currentHour;
         }
 
         uint256 latestAveragePrice = (movingPrice[currentHour] *
-            iterations +
-            oracle.readData()) / (iterations + 1);
-        iterations++;
+            _updatesSinceHourStart +
+            oracle.readData()) / (_updatesSinceHourStart + 1);
+        _updatesSinceHourStart++;
 
         movingPrice[currentHour] = latestAveragePrice;
 
-        if (latestAveragePrice < _currentMinPrice) {
-            _currentMinPrice = latestAveragePrice;
-            _minIndex = currentHour;
-        } else if (latestAveragePrice > _currentMaxPrice) {
-            _currentMaxPrice = latestAveragePrice;
-            _maxIndex = currentHour;
+        if (latestAveragePrice < _minPrice) {
+            _minPrice = latestAveragePrice;
+            _minPriceIndex = currentHour;
+        } else if (latestAveragePrice > _maxPrice) {
+            _maxPrice = latestAveragePrice;
+            _maxPriceIndex = currentHour;
         }
         lastTimestamp = block.timestamp;
     }
 
-    function _ifUpdateMinMax(uint8 index, uint8 currentHour)
+    function _shouldUpdateMinMax(uint8 index, uint8 currentHour)
         internal
         view
         returns (bool)
@@ -98,12 +107,12 @@ contract ShuOracleConverter is IOracleShu {
 
         for (uint8 i = 0; i < UPDATE_TIME_IN_HOUR; i++) {
             uint256 price = movingPrice[i];
-            if (price != 0 && price < min) {
-                _minIndex = i;
+            if (price < min) {
+                _minPriceIndex = i;
                 min = price;
             }
         }
-        _currentMinPrice = min;
+        _minPrice = min;
     }
 
     function _updateMaxPrice() internal {
@@ -112,10 +121,10 @@ contract ShuOracleConverter is IOracleShu {
         for (uint8 i = 0; i < UPDATE_TIME_IN_HOUR; i++) {
             uint256 price = movingPrice[i];
             if (price > max) {
-                _maxIndex = i;
+                _maxPriceIndex = i;
                 max = price;
             }
         }
-        _currentMaxPrice = max;
+        _maxPrice = max;
     }
 }
