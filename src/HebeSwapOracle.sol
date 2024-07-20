@@ -5,7 +5,7 @@ import "@hebeswap/IStdReference.sol";
 import "./IOracle.sol";
 
 contract HebeSwapOracle is IOracle {
-    IStdReference public ref;
+    IStdReference public immutable ref;
     uint256 public immutable scalingFactor;
 
     constructor(IStdReference _ref, uint8 _decimals, uint8 _hebeSwapDecimals) {
