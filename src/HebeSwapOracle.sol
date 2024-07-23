@@ -7,8 +7,8 @@ import "./IOracle.sol";
 contract HebeSwapOracle is IOracle {
     IStdReference public immutable ref;
     uint256 public immutable scalingFactor;
-    string public immutable baseToken;
-    string public immutable quoteToken;
+    string public baseToken;
+    string public quoteToken;
 
     constructor(IStdReference _ref, uint8 _decimals, uint8 _hebeSwapDecimals, string memory _baseToken, string memory _quoteToken) {
         ref = _ref;
