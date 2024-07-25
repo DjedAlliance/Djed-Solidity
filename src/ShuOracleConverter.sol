@@ -51,7 +51,7 @@ contract ShuOracleConverter is IOracleShu {
         );
         if (
             currentHour != previousHour ||
-            (lastTimestamp + 1 days) == block.timestamp
+            block.timestamp / (1 hours) - previousHour >= 1
         ) {
             _updatesSinceHourStart = 0;
             uint8 hourCount = (currentHour > previousHour)
