@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "./DeploymentParameters.sol";
 import {Djed} from "../src/Djed.sol";
 
-contract DeployDjed is Script, Helper {
+contract DeployDjed is Script, DeploymentParameters {
     function run(SupportedNetworks network) external {
         uint256 INITIAL_BALANCE = 0;
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
