@@ -37,7 +37,7 @@ The `scripts/env/` folder contain sample .env files for different networks. To d
 forge script ./scripts/deployDjedContract.s.sol:DeployDjed -vvvv --broadcast --rpc-url <NETWORK_RPC_ENDPOINT> --sig "run(uint8)" -- <SupportedNetworks_ID> --verify
 ```
 
-Refer `foundry.toml` for NETWORK_RPC_ENDPOINT and `scripts/Helper.sol` for SupportedNetworks_ID. Update `scripts/Helper.sol` file with each Oracle deployments.
+Refer `foundry.toml` for NETWORK_RPC_ENDPOINT and `scripts/DeploymentParameters.sol` for SupportedNetworks_ID. Update `scripts/DeploymentParameters.sol` file with each Oracle deployments.
 
 To deploy chainlink oracle, run: 
 

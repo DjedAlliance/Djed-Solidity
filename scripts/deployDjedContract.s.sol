@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
-import "./Helper.sol";
+import "./DeploymentParameters.sol";
 import {Djed} from "../src/Djed.sol";
 
 contract DeployDjed is Script, Helper {
