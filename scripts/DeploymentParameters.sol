@@ -66,31 +66,31 @@ contract Helper {
 
         if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
             oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR;
-            treasuryAddress = 0x078D888E40faAe0f32594342c85940AF3949E666;
+            treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
             INITIAL_TREASURY_FEE=25e20;
-            TREASURY_REVENUE_TARGET=1e25;
-            RESERVE_RATIO_MIN=4e24;
+            TREASURY_REVENUE_TARGET=21700000e18;
+            RESERVE_RATIO_MIN=3e24;
             RESERVE_RATIO_MAX=8e24;
-            FEE=15e21;
-            THREASHOLD_SUPPLY_SC=5e11;
-            RESERVE_COIN_MINIMUM_PRICE=1e18;
-            RESERVE_COIN_INITIAL_PRICE=1e20;
+            FEE=12500e18;
+            THREASHOLD_SUPPLY_SC=10e6;
+            RESERVE_COIN_MINIMUM_PRICE=1e15;
+            RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
         }
 
         if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
             oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET;
-            treasuryAddress = 0x078D888E40faAe0f32594342c85940AF3949E666;
+            treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
             INITIAL_TREASURY_FEE=25e20;
-            TREASURY_REVENUE_TARGET=1e25;
-            RESERVE_RATIO_MIN=4e24;
+            TREASURY_REVENUE_TARGET=21700000e18;
+            RESERVE_RATIO_MIN=3e24;
             RESERVE_RATIO_MAX=8e24;
-            FEE=15e21;
-            THREASHOLD_SUPPLY_SC=5e11;
-            RESERVE_COIN_MINIMUM_PRICE=1e18;
-            RESERVE_COIN_INITIAL_PRICE=1e20;
+            FEE=12500e18;
+            THREASHOLD_SUPPLY_SC=10e6;
+            RESERVE_COIN_MINIMUM_PRICE=1e15;
+            RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
         }
 
