@@ -2,12 +2,12 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
-import "./Helper.sol";
+import "./DeploymentParameters.sol";
 import {Djed} from "../src/Djed.sol";
 
-contract DeployDjed is Script, Helper {
+contract DeployDjed is Script, DeploymentParameters {
     function run(SupportedNetworks network) external {
-        uint256 INITIAL_BALANCE = 1e18;
+        uint256 INITIAL_BALANCE = 0;
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(senderPrivateKey);
