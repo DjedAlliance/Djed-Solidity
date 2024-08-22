@@ -10,9 +10,15 @@ contract HebeSwapOracle is IOracle {
     string public baseToken;
     string public quoteToken;
 
-    constructor(IStdReference _ref, uint8 _decimals, uint8 _hebeSwapDecimals, string memory _baseToken, string memory _quoteToken) {
+    constructor(
+        IStdReference _ref,
+        uint8 _decimals,
+        uint8 _hebeSwapDecimals,
+        string memory _baseToken,
+        string memory _quoteToken
+    ) {
         ref = _ref;
-        scalingFactor = 10**(uint256(_decimals - _hebeSwapDecimals) );
+        scalingFactor = 10**(uint256(_decimals - _hebeSwapDecimals));
         baseToken = _baseToken;
         quoteToken = _quoteToken;
     }
@@ -20,7 +26,10 @@ contract HebeSwapOracle is IOracle {
     function acceptTermsOfService() external {}
 
     function readData() external view returns (uint256) {
-        IStdReference.ReferenceData memory data = ref.getReferenceData(baseToken, quoteToken);
+        IStdReference.ReferenceData memory data = ref.getReferenceData(
+            baseToken,
+            quoteToken
+        );
         return (uint256(int256(data.rate)) * scalingFactor);
     }
 }

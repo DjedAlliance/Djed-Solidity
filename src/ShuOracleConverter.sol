@@ -49,10 +49,7 @@ contract ShuOracleConverter is IOracleShu {
         uint8 currentHour = uint8(
             (block.timestamp / (1 hours)) % UPDATE_TIME_IN_HOUR
         );
-        if (
-            currentHour != previousHour ||
-            block.timestamp / (1 hours) - previousHour >= 1
-        ) {
+        if (block.timestamp / (1 hours) - previousHour >= 1) {
             _updatesSinceHourStart = 0;
             uint8 hourCount = (currentHour > previousHour)
                 ? currentHour - previousHour

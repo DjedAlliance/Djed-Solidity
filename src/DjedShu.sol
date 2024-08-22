@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./Coin.sol";
 import "./IOracleShu.sol";
 
-contract Djed is ReentrancyGuard {
+contract DjedShu is ReentrancyGuard {
     IOracleShu public oracle;
     Coin public stableCoin;
     Coin public reserveCoin;

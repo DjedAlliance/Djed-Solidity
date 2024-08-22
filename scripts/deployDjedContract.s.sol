@@ -6,7 +6,7 @@ import "./DeploymentParameters.sol";
 import {Djed} from "../src/Djed.sol";
 
 contract DeployDjed is Script, DeploymentParameters {
-    function run(SupportedNetworks network) external {
+    function run(SupportedNetworks network, SupportedVersion version) external {
         uint256 INITIAL_BALANCE = 0;
         uint256 senderPrivateKey = vm.envUint("PRIVATE_KEY");
 
@@ -24,7 +24,7 @@ contract DeployDjed is Script, DeploymentParameters {
             uint256 RESERVE_COIN_MINIMUM_PRICE,
             uint256 RESERVE_COIN_INITIAL_PRICE,
             uint256 TX_LIMIT
-        ) = getConfigFromNetwork(network);
+        ) = getConfigFromNetwork(network, version);
 
         Djed djed = new Djed{value: INITIAL_BALANCE}(
             oracleAddress,
