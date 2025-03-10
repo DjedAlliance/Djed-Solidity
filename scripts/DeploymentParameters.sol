@@ -10,6 +10,11 @@ contract DeploymentParameters {
         ETHEREUM_CLASSIC_MAINNET
     }
 
+    enum SupportedVersion {
+        DJED,
+        DJED_SHU
+    }
+
     mapping(SupportedNetworks enumValue => string humanReadableName)
         public networks;
 
@@ -27,6 +32,7 @@ contract DeploymentParameters {
     address constant CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS = 0xB9C050Fd340aD5ED3093F31aAFAcC3D779f405f4;
     address constant HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR = 0xb0d99da21Bb4fa877e3D1DCA89E6657c5e840Eb2;
     address constant HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET = 0x2fd961e20896e121EC7D499cC4F38462e286994A;
+    address constant HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MORDOR = 0x8Bd4A5F6a4727Aa4AC05f8784aACAbE2617e860A;
     
     address oracleAddress;
     address treasuryAddress;
@@ -39,7 +45,8 @@ contract DeploymentParameters {
     }
 
     function getConfigFromNetwork(
-        SupportedNetworks network
+        SupportedNetworks network,
+        SupportedVersion version
     )
         internal
         returns (
@@ -65,7 +72,7 @@ contract DeploymentParameters {
         }
 
         if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
-            oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR;
+            oracleAddress = version == SupportedVersion.DJED_SHU ? HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MORDOR : HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
             INITIAL_TREASURY_FEE=25e20;
