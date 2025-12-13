@@ -14,7 +14,6 @@ contract DjedTefnut is ReentrancyGuard {
     // Treasury Parameters:
     address public immutable TREASURY; // address of the treasury
     uint256 public immutable TREASURY_FEE; // fixed treasury fee (no decay)
-    uint256 public treasuryRevenue = 0; // holds how much has already been paid to the treasury // Mutable state variable
 
     // Djed Parameters:
     uint256 public immutable FEE;
@@ -96,7 +95,7 @@ contract DjedTefnut is ReentrancyGuard {
     function buyStableCoins(address receiver, uint256 feeUi, address ui) external payable nonReentrant {
         oracle.updateOracleValues();
         uint256 scP = scMaxPrice(msg.value);
-        uint256 amountBc = deductFees(msg.value, feeUi, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
+        uint256 amountBc = deductFees(msg.value, feeUi, ui);
         uint256 amountSc = (amountBc * SC_DECIMAL_SCALING_FACTOR) / scP;
         require(amountSc <= TX_LIMIT || stableCoin.totalSupply() < THRESHOLD_SUPPLY_SC, "buySC: tx limit exceeded");
         require(amountSc > 0, "buySC: receiving zero SCs");
@@ -111,7 +110,7 @@ contract DjedTefnut is ReentrancyGuard {
         require(amountSc <= TX_LIMIT || stableCoin.totalSupply() < THRESHOLD_SUPPLY_SC, "sellSC: tx limit exceeded");
         uint256 scP = scMinPrice(0);
         uint256 value = (amountSc * scP) / SC_DECIMAL_SCALING_FACTOR;
-        uint256 amountBc = deductFees(value, feeUi, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
+        uint256 amountBc = deductFees(value, feeUi, ui);
         require(amountBc > 0, "sellSC: receiving zero BCs");
         stableCoin.burn(msg.sender, amountSc);
         transferEth(receiver, amountBc);
@@ -122,7 +121,7 @@ contract DjedTefnut is ReentrancyGuard {
         oracle.updateOracleValues();
         uint256 scP = scMinPrice(msg.value);
         uint256 rcBp = rcBuyingPrice(scP, msg.value);
-        uint256 amountBc = deductFees(msg.value, feeUi, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
+        uint256 amountBc = deductFees(msg.value, feeUi, ui);
         require(amountBc <= (TX_LIMIT * scP) / SC_DECIMAL_SCALING_FACTOR || stableCoin.totalSupply() < THRESHOLD_SUPPLY_SC, "buyRC: tx limit exceeded");
         uint256 amountRc = (amountBc * RC_DECIMAL_SCALING_FACTOR) / rcBp;
         require(amountRc > 0, "buyRC: receiving zero RCs");
@@ -137,7 +136,7 @@ contract DjedTefnut is ReentrancyGuard {
         uint256 scP = scMaxPrice(0);
         uint256 value = (amountRc * rcTargetPrice(scP, 0)) / RC_DECIMAL_SCALING_FACTOR;
         require(value <= (TX_LIMIT * scP) / SC_DECIMAL_SCALING_FACTOR || stableCoin.totalSupply() < THRESHOLD_SUPPLY_SC, "sellRC: tx limit exceeded");
-        uint256 amountBc = deductFees(value, feeUi, ui); // side-effect: increases `treasuryRevenue` and pays UI and treasury
+        uint256 amountBc = deductFees(value, feeUi, ui);
         require(amountBc > 0, "sellRC: receiving zero BCs");
         reserveCoin.burn(msg.sender, amountRc);
         transferEth(receiver, amountBc);
@@ -153,7 +152,6 @@ contract DjedTefnut is ReentrancyGuard {
         uint256 f = (value * FEE) / SCALING_FACTOR;
         uint256 fUi = (value * feeUi) / SCALING_FACTOR;
         uint256 fT = (value * TREASURY_FEE) / SCALING_FACTOR; // Fixed treasury fee (no decay)
-        treasuryRevenue += fT;
         transferEth(TREASURY, fT);
         transferEth(ui, fUi);
         // transferEth(address(this), f); // this happens implicitly, and thus `f` is effectively transferred to the reserve.
