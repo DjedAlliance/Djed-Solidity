@@ -1,0 +1,17 @@
+{
+  "lib/contracts": {
+    "rev": "72073d0e2cabf7966b493fc77291e4891c5402d7"
+  },
+  "lib/forge-std": {
+    "rev": "f73c73d2018eb6a111f35e4dae7b4f27401e9421"
+  },
+  "lib/hebeswap-contract": {
+    "rev": "fb606bdcf5ddaee985039605bcd847918a66c3a7"
+  },
+  "lib/openzeppelin-contracts": {
+    "rev": "0457042d93d9dfd760dbaa06a4d2f1216fdbe297"
+  },
+  "lib/solmate": {
+    "rev": "3998897acb502fa7b480f505138a6ae1842e8d10"
+  }
+}
