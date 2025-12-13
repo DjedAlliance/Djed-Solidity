@@ -35,6 +35,18 @@ contract DeploymentParameters {
     address constant HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET = 0x2fd961e20896e121EC7D499cC4F38462e286994A;
     address constant HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MORDOR = 0x8Bd4A5F6a4727Aa4AC05f8784aACAbE2617e860A;
     
+    // DEPLOYMENT REQUIRED: Before using Tefnut on mainnet, deploy ShuOracleConverter
+    // Step 1: Run deployment script to wrap the existing HebeSwap oracle:
+    //   forge script scripts/deployOracleConverter.s.sol:DeployOracleConverter \
+    //     --rpc-url https://etc.rivet.link \
+    //     --broadcast \
+    //     --verify
+    // 
+    // Step 2: Update this constant with the deployed ShuOracleConverter address
+    // Step 3: The converter will wrap HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET (0x2fd961e20896e121EC7D499cC4F38462e286994A)
+    //         and provide IOracleShu interface (readMaxPrice, readMinPrice, updateOracleValues)
+    address constant HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MAINNET = address(0); // TODO: Deploy ShuOracleConverter first
+    
     address oracleAddress;
     address treasuryAddress;
 
@@ -68,7 +80,11 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e18;
             RESERVE_COIN_INITIAL_PRICE=1e20;
             TX_LIMIT=1e10;
-        } else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
+
+
+        }
+
+        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
             oracleAddress = (version == SupportedVersion.DJED_SHU || version == SupportedVersion.DJED_TEFNUT) ? HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MORDOR : HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
@@ -81,7 +97,9 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
-        } else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
+        }
+
+        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
             oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
@@ -94,8 +112,6 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
-        } else {
-            revert(string(abi.encodePacked("Unsupported network: ", networks[network])));
         }
 
         return (
@@ -115,6 +131,10 @@ contract DeploymentParameters {
     }
 
     // Tefnut version - simplified parameters (no reserve ratios, no treasury revenue target)
+    // NOTE: Mainnet deployment will revert until ShuOracleConverter is deployed.
+    // This is an intentional safeguard because DjedTefnut requires IOracleShu interface,
+    // but the mainnet HebeSwap oracle only implements IOracle. The require() check ensures
+    // no one accidentally deploys with address(0), which would cause runtime failures.
     function getTefnutConfigFromNetwork(
         SupportedNetworks network
     )
@@ -145,7 +165,12 @@ contract DeploymentParameters {
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
         } else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
-            oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET;
+            // Mainnet requires ShuOracleConverter deployment first
+            require(
+                HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MAINNET != address(0),
+                "Deploy ShuOracleConverter on mainnet before using Tefnut. Run: forge script scripts/deployOracleConverter.s.sol"
+            );
+            oracleAddress = HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MAINNET;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
             INITIAL_TREASURY_FEE=25e20; // Used as fixed treasury fee for Tefnut
@@ -155,7 +180,10 @@ contract DeploymentParameters {
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
         } else {
-            revert(string(abi.encodePacked("Unsupported network for Tefnut: ", networks[network])));
+            revert(string(abi.encodePacked(
+                "Tefnut not supported on network: ", 
+                networks[network]
+            )));
         }
 
         return (
