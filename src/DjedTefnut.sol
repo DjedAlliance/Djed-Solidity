@@ -43,6 +43,15 @@ contract DjedTefnut is ReentrancyGuard {
         uint256 rcInitialPrice,
         uint256 txLimit
     ) payable {
+        // Constructor validation
+        require(oracleAddress != address(0), "Invalid oracle address");
+        require(treasury != address(0), "Invalid treasury address");
+        require(scalingFactor > 0, "Scaling factor must be > 0");
+        require(fee + treasuryFee <= scalingFactor, "Total fees exceed 100%");
+        require(rcInitialPrice >= rcMinPrice, "Initial price < min price");
+        require(thresholdSupplySc > 0, "Threshold supply must be > 0");
+        require(txLimit > 0, "TX limit must be > 0");
+
         stableCoin = new Coin("StableCoin", "SC");
         reserveCoin = new Coin("ReserveCoin", "RC");
         SC_DECIMAL_SCALING_FACTOR = 10 ** stableCoin.decimals();
@@ -101,7 +110,7 @@ contract DjedTefnut is ReentrancyGuard {
         require(amountSc > 0, "buySC: receiving zero SCs");
         stableCoin.mint(receiver, amountSc);
         // Reserve ratio check removed in Tefnut
-        emit BoughtStableCoins(msg.sender, receiver, amountSc, msg.value);
+        emit BoughtStableCoins(msg.sender, receiver, amountSc, amountBc);
     }
 
     function sellStableCoins(uint256 amountSc, address receiver, uint256 feeUi, address ui) external nonReentrant {
@@ -127,7 +136,7 @@ contract DjedTefnut is ReentrancyGuard {
         require(amountRc > 0, "buyRC: receiving zero RCs");
         reserveCoin.mint(receiver, amountRc);
         // Reserve ratio check removed in Tefnut
-        emit BoughtReserveCoins(msg.sender, receiver, amountRc, msg.value);
+        emit BoughtReserveCoins(msg.sender, receiver, amountRc, amountBc);
     }
 
     function sellReserveCoins(uint256 amountRc, address receiver, uint256 feeUi, address ui) external nonReentrant {
@@ -149,6 +158,8 @@ contract DjedTefnut is ReentrancyGuard {
     // # Auxiliary Functions
 
     function deductFees(uint256 value, uint256 feeUi, address ui) internal returns (uint256) {
+        require(ui != address(0), "Invalid UI address");
+        require(feeUi + FEE + TREASURY_FEE <= SCALING_FACTOR, "Total fees exceed 100%");
         uint256 f = (value * FEE) / SCALING_FACTOR;
         uint256 fUi = (value * feeUi) / SCALING_FACTOR;
         uint256 fT = (value * TREASURY_FEE) / SCALING_FACTOR; // Fixed treasury fee (no decay)
@@ -186,6 +197,7 @@ contract DjedTefnut is ReentrancyGuard {
     function rcTargetPrice(uint256 _scPrice, uint256 currentPaymentAmount) internal view returns (uint256) {
         uint256 supplyRc = reserveCoin.totalSupply();
         require(supplyRc != 0, "RC supply is zero");
+        require(R(currentPaymentAmount) >= L(_scPrice), "Under-collateralized: reserve < liability");
         return (E(_scPrice, currentPaymentAmount) * RC_DECIMAL_SCALING_FACTOR) / supplyRc;
     }
 
