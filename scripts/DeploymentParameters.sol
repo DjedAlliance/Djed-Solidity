@@ -57,6 +57,9 @@ contract DeploymentParameters {
         networks[SupportedNetworks.ETHEREUM_CLASSIC_MAINNET] = "Ethereum Classic Mainnet";
     }
 
+    // Get configuration for Djed or DjedShu variants
+    // NOTE: For DJED_TEFNUT, use getTefnutConfigFromNetwork() instead.
+    // This function will revert if DJED_TEFNUT is passed to prevent oracle misrouting.
     function getConfigFromNetwork(
         SupportedNetworks network,
         SupportedVersion version
@@ -67,6 +70,12 @@ contract DeploymentParameters {
             uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256
         )
     {
+        // DJED_TEFNUT has its own configuration function with different parameters
+        require(
+            version != SupportedVersion.DJED_TEFNUT,
+            "Use getTefnutConfigFromNetwork() for DJED_TEFNUT deployment"
+        );
+
         if (network == SupportedNetworks.ETHEREUM_SEPOLIA) {
             oracleAddress = CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS;
             treasuryAddress = 0x0f5342B55ABCC0cC78bdB4868375bCA62B6c16eA;
@@ -80,12 +89,12 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e18;
             RESERVE_COIN_INITIAL_PRICE=1e20;
             TX_LIMIT=1e10;
-
-
         }
-
-        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
-            oracleAddress = (version == SupportedVersion.DJED_SHU || version == SupportedVersion.DJED_TEFNUT) ? HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MORDOR : HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR;
+        else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
+            // Use SHU oracle for DJED_SHU, regular oracle for DJED
+            oracleAddress = (version == SupportedVersion.DJED_SHU) 
+                ? HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MORDOR 
+                : HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
             INITIAL_TREASURY_FEE=25e20;
@@ -98,9 +107,17 @@ contract DeploymentParameters {
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
         }
-
-        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
-            oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET;
+        else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
+            // Use SHU oracle for DJED_SHU if deployed, regular oracle for DJED
+            if (version == SupportedVersion.DJED_SHU) {
+                require(
+                    HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MAINNET != address(0),
+                    "Deploy ShuOracleConverter on mainnet before using DJED_SHU"
+                );
+                oracleAddress = HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MAINNET;
+            } else {
+                oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET;
+            }
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
             INITIAL_TREASURY_FEE=25e20;
@@ -112,6 +129,12 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
+        }
+        else {
+            revert(string(abi.encodePacked(
+                "Unsupported network: ", 
+                networks[network]
+            )));
         }
 
         return (
