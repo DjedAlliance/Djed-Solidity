@@ -46,10 +46,10 @@ contract DeploymentParametersTefnut {
                 treasury: SEPOLIA_TREASURY,
                 treasuryFee: 25e20,                         // 0.25%
                 fee: 15e21,                                 // 1.5%
-                thresholdSupplySc: 5e11,                    // 500k SC
+                thresholdSupplySc: 5e11,                    // 500B SC
                 rcMinPrice: 1e18,                           // 1 ETH per RC
                 rcInitialPrice: 1e20,                       // 100 ETH per RC
-                txLimit: 1e10                               // 10k SC
+                txLimit: 1e10                               // 10B SC
             });
         } else {
             // Local/Anvil Default Configuration
