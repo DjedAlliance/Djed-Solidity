@@ -68,11 +68,7 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e18;
             RESERVE_COIN_INITIAL_PRICE=1e20;
             TX_LIMIT=1e10;
-
-
-        }
-
-        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
+        } else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
             oracleAddress = (version == SupportedVersion.DJED_SHU || version == SupportedVersion.DJED_TEFNUT) ? HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MORDOR : HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
@@ -85,9 +81,7 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
-        }
-
-        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
+        } else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
             oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
@@ -100,6 +94,8 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
+        } else {
+            revert(string(abi.encodePacked("Unsupported network: ", networks[network])));
         }
 
         return (
@@ -138,9 +134,7 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e18;
             RESERVE_COIN_INITIAL_PRICE=1e20;
             TX_LIMIT=1e10;
-        }
-
-        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
+        } else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
             oracleAddress = HEBESWAP_SHU_ORACLE_INVERTED_ADDRESS_MORDOR;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
@@ -150,9 +144,7 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
-        }
-
-        if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
+        } else if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
             oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET;
             treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
             SCALING_FACTOR=1e24;
@@ -162,6 +154,8 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
+        } else {
+            revert(string(abi.encodePacked("Unsupported network for Tefnut: ", networks[network])));
         }
 
         return (
