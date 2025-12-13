@@ -47,8 +47,8 @@ contract DeploymentParametersTefnut {
                 treasuryFee: 25e20,                         // 0.25%
                 fee: 15e21,                                 // 1.5%
                 thresholdSupplySc: 5e11,                    // 500k SC
-                rcMinPrice: 1e18,                           // 1 wei per RC
-                rcInitialPrice: 1e20,                       // 100 wei per RC
+                rcMinPrice: 1e18,                           // 1 ETH per RC
+                rcInitialPrice: 1e20,                       // 100 ETH per RC
                 txLimit: 1e10                               // 10k SC
             });
         } else {
@@ -61,8 +61,8 @@ contract DeploymentParametersTefnut {
                 treasuryFee: 0,                             // 0% for testing
                 fee: 15e21,                                 // 1.5%
                 thresholdSupplySc: 1e6,                     // 1M SC
-                rcMinPrice: 1e18,                           // 1 wei per RC
-                rcInitialPrice: 1e20,                       // 100 wei per RC
+                rcMinPrice: 1e18,                           // 1 ETH per RC
+                rcInitialPrice: 1e20,                       // 100 ETH per RC
                 txLimit: 200e6                              // 200 SC
             });
         }
