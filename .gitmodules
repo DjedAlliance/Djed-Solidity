@@ -13,3 +13,6 @@
 [submodule "lib/hebeswap-contract"]
 	path = lib/hebeswap-contract
 	url = https://github.com/HebePlatform/Oracle.git
+[submodule "lib/chainlink-brownie-contracts"]
+	path = lib/chainlink-brownie-contracts
+	url = https://github.com/smartcontractkit/chainlink-brownie-contracts
