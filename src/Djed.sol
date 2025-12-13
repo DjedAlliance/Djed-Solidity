@@ -31,37 +31,51 @@ contract Djed is ReentrancyGuard {
     uint256 public immutable scDecimalScalingFactor;
     uint256 public immutable rcDecimalScalingFactor;
 
+    struct ConstructorParams {
+        address oracleAddress;
+        uint256 scalingFactor;
+        address treasury;
+        uint256 initialTreasuryFee;
+        uint256 treasuryRevenueTarget;
+        uint256 reserveRatioMin;
+        uint256 reserveRatioMax;
+        uint256 fee;
+        uint256 thresholdSupplySC;
+        uint256 rcMinPrice;
+        uint256 rcInitialPrice;
+        uint256 txLimit;
+        string stableCoinName;
+        string stableCoinSymbol;
+        string reserveCoinName;
+        string reserveCoinSymbol;
+    }
+
     event BoughtStableCoins(address indexed buyer, address indexed receiver, uint256 amountSC, uint256 amountBC);
     event SoldStableCoins(address indexed seller, address indexed receiver, uint256 amountSC, uint256 amountBC);
     event BoughtReserveCoins(address indexed buyer, address indexed receiver, uint256 amountRC, uint256 amountBC);
     event SoldReserveCoins(address indexed seller, address indexed receiver, uint256 amountRC, uint256 amountBC);
     event SoldBothCoins(address indexed seller, address indexed receiver, uint256 amountSC, uint256 amountRC, uint256 amountBC);
 
-    constructor(
-        address oracleAddress, uint256 _scalingFactor,
-        address _treasury, uint256 _initialTreasuryFee, uint256 _treasuryRevenueTarget,
-        uint256 _reserveRatioMin, uint256 _reserveRatioMax,
-        uint256 _fee, uint256 _thresholdSupplySC, uint256 _rcMinPrice, uint256 _rcInitialPrice, uint256 _txLimit
-    ) payable {
-        stableCoin = new Coin("StableCoin", "SC");
-        reserveCoin = new Coin("ReserveCoin", "RC");
+    constructor(ConstructorParams memory params) payable {
+        stableCoin = new Coin(params.stableCoinName, params.stableCoinSymbol);
+        reserveCoin = new Coin(params.reserveCoinName, params.reserveCoinSymbol);
         scDecimalScalingFactor = 10**stableCoin.decimals();
         rcDecimalScalingFactor = 10**reserveCoin.decimals();
-        scalingFactor = _scalingFactor;
+        scalingFactor = params.scalingFactor;
 
-        treasury = _treasury;
-        initialTreasuryFee = _initialTreasuryFee;
-        treasuryRevenueTarget = _treasuryRevenueTarget;
+        treasury = params.treasury;
+        initialTreasuryFee = params.initialTreasuryFee;
+        treasuryRevenueTarget = params.treasuryRevenueTarget;
 
-        reserveRatioMin = _reserveRatioMin;
-        reserveRatioMax = _reserveRatioMax;
-        fee = _fee;
-        thresholdSupplySC = _thresholdSupplySC;
-        rcMinPrice = _rcMinPrice;
-        rcInitialPrice = _rcInitialPrice;
-        txLimit = _txLimit;
+        reserveRatioMin = params.reserveRatioMin;
+        reserveRatioMax = params.reserveRatioMax;
+        fee = params.fee;
+        thresholdSupplySC = params.thresholdSupplySC;
+        rcMinPrice = params.rcMinPrice;
+        rcInitialPrice = params.rcInitialPrice;
+        txLimit = params.txLimit;
 
-        oracle = IOracle(oracleAddress);
+        oracle = IOracle(params.oracleAddress);
         oracle.acceptTermsOfService();
     }
 
