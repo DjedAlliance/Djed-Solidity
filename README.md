@@ -46,3 +46,16 @@ forge script ./scripts/deployChainlinkOracle.s.sol:DeployChainlinkOracle -vvvv -
 ```
 
 We can also deploy Inverting Chainlink Oracle (if chainlink oracle returns price feed from ETH/USD, the corresponding inverting oracle would return price feed from USD/ETH), replace DeployChainlinkOracle with DeployInvertingChainlinkOracle in the above script. 
+
+## Local Anvil Quickstart
+
+For local protocol testing on Foundry Anvil, use the dedicated step-by-step guide:
+
+- [Anvil Local Testing Guide](docs/ANVIL_LOCAL_TESTING.md)
+
+This guide includes:
+- local oracle deployment with `--broadcast`
+- Djed deployment using `run(uint8,uint8)`
+- SC/RC address discovery via `stableCoin()` and `reserveCoin()`
+- RC bootstrap before SC buy
+- common frontend/address pitfalls
