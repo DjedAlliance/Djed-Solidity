@@ -28,10 +28,6 @@ contract DeploymentParameters {
     uint256 public RESERVE_COIN_MINIMUM_PRICE;
     uint256 public RESERVE_COIN_INITIAL_PRICE;
     uint256 public TX_LIMIT;
-    string public STABLE_COIN_NAME;
-    string public STABLE_COIN_SYMBOL;
-    string public RESERVE_COIN_NAME;
-    string public RESERVE_COIN_SYMBOL;
 
     address constant CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS = 0xB9C050Fd340aD5ED3093F31aAFAcC3D779f405f4;
     address constant HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR = 0xb0d99da21Bb4fa877e3D1DCA89E6657c5e840Eb2;
@@ -55,8 +51,7 @@ contract DeploymentParameters {
         internal
         returns (
             address, address, 
-            uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256,
-            string memory, string memory, string memory, string memory
+            uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256
         )
     {
         if (network == SupportedNetworks.ETHEREUM_SEPOLIA) {
@@ -72,31 +67,8 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e18;
             RESERVE_COIN_INITIAL_PRICE=1e20;
             TX_LIMIT=1e10;
-            STABLE_COIN_NAME = "StableCoin";
-            STABLE_COIN_SYMBOL = "SC";
-            RESERVE_COIN_NAME = "ReserveCoin";
-            RESERVE_COIN_SYMBOL = "RC";
 
 
-        }
-
-        if (network == SupportedNetworks.MILKOMEDA_TESTNET) {
-            oracleAddress = HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR;
-            treasuryAddress = 0xBC80a858F6F9116aA2dc549325d7791432b6c6C4;
-            SCALING_FACTOR=1e24;
-            INITIAL_TREASURY_FEE=25e20;
-            TREASURY_REVENUE_TARGET=21700000e18;
-            RESERVE_RATIO_MIN=3e24;
-            RESERVE_RATIO_MAX=8e24;
-            FEE=12500e18;
-            THREASHOLD_SUPPLY_SC=10e6;
-            RESERVE_COIN_MINIMUM_PRICE=1e15;
-            RESERVE_COIN_INITIAL_PRICE=1e18;
-            TX_LIMIT=1e10;
-            STABLE_COIN_NAME = "StableCoin";
-            STABLE_COIN_SYMBOL = "SC";
-            RESERVE_COIN_NAME = "ReserveCoin";
-            RESERVE_COIN_SYMBOL = "RC";
         }
 
         if (network == SupportedNetworks.ETHEREUM_CLASSIC_MORDOR) {
@@ -112,10 +84,6 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
-            STABLE_COIN_NAME = "StableCoin";
-            STABLE_COIN_SYMBOL = "SC";
-            RESERVE_COIN_NAME = "ReserveCoin";
-            RESERVE_COIN_SYMBOL = "RC";
         }
 
         if (network == SupportedNetworks.ETHEREUM_CLASSIC_MAINNET) {
@@ -131,10 +99,6 @@ contract DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE=1e15;
             RESERVE_COIN_INITIAL_PRICE=1e18;
             TX_LIMIT=1e10;
-            STABLE_COIN_NAME = "StableCoin";
-            STABLE_COIN_SYMBOL = "SC";
-            RESERVE_COIN_NAME = "ReserveCoin";
-            RESERVE_COIN_SYMBOL = "RC";
         }
 
         return (
@@ -149,11 +113,7 @@ contract DeploymentParameters {
             THREASHOLD_SUPPLY_SC,
             RESERVE_COIN_MINIMUM_PRICE,
             RESERVE_COIN_INITIAL_PRICE,
-            TX_LIMIT,
-            STABLE_COIN_NAME,
-            STABLE_COIN_SYMBOL,
-            RESERVE_COIN_NAME,
-            RESERVE_COIN_SYMBOL
+            TX_LIMIT
         );
     }
 }

@@ -23,11 +23,7 @@ contract DeployDjedShu is Script, DeploymentParameters {
             uint256 THREASHOLD_SUPPLY_SC,
             uint256 RESERVE_COIN_MINIMUM_PRICE,
             uint256 RESERVE_COIN_INITIAL_PRICE,
-            uint256 TX_LIMIT,
-            string memory stableCoinName,
-            string memory stableCoinSymbol,
-            string memory reserveCoinName,
-            string memory reserveCoinSymbol
+            uint256 TX_LIMIT
         ) = getConfigFromNetwork(network, version);
 
         DjedShu djedShu = new DjedShu{value: INITIAL_BALANCE}(
@@ -43,10 +39,8 @@ contract DeployDjedShu is Script, DeploymentParameters {
             RESERVE_COIN_MINIMUM_PRICE,
             RESERVE_COIN_INITIAL_PRICE,
             TX_LIMIT,
-            stableCoinName,
-            stableCoinSymbol,
-            reserveCoinName,
-            reserveCoinSymbol
+            "StableCoin", "SC",
+            "ReserveCoin", "RC"
         );
 
         console.log(

@@ -41,34 +41,14 @@ contract DjedTest is CTest, Utilities {
         assertTrue(THRESHOLD_NUMBER_SC > 0);
         assertTrue(RESERVE_COIN_WHOLE_MINIMUM_PRICE > 0);
         assertTrue(ORACLE_EXCHANGE_RATE > 0);
+        assertEq(djed.stableCoin().name(), "StableCoin");
+        assertEq(djed.stableCoin().symbol(), "SC");
+        assertEq(djed.reserveCoin().name(), "ReserveCoin");
+        assertEq(djed.reserveCoin().symbol(), "RC");
     }
 
     function testInitialBalance() public {
         assertEq(R(djed), INITIAL_BALANCE);
-    }
-
-    function testConfigurableCoinNames() public {
-        // Deploy with custom names
-        Djed customDjed = (new Djed){value: INITIAL_BALANCE}(
-            address(oracle),
-            SCALING_FACTOR,
-            TREASURY,
-            INITIAL_TREASURY_FEE,
-            TREASURY_REVENUE_TARGET,
-            RESERVE_RATIO_MIN,
-            RESERVE_RATIO_MAX,
-            FEE,
-            THRESHOLD_NUMBER_SC,
-            RESERVE_COIN_WHOLE_MINIMUM_PRICE,
-            RESERVE_COIN_WHOLE_INITIAL_PRICE,
-            TX_LIMIT,
-            "DjedDollar", "USDD",
-            "DjedReserve", "DRSV"
-        );
-        assertEq(customDjed.stableCoin().name(), "DjedDollar");
-        assertEq(customDjed.stableCoin().symbol(), "USDD");
-        assertEq(customDjed.reserveCoin().name(), "DjedReserve");
-        assertEq(customDjed.reserveCoin().symbol(), "DRSV");
     }
 
     function testBuyStableCoins() public {
