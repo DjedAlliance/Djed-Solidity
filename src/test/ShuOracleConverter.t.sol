@@ -51,10 +51,12 @@ contract OracleConverterTest is Test, Utilities {
         oracleConverter.updateOracleValues(); // First update after 5 hours
 
         oracle.decreasePrice();
-        skip(3600 * 21); // Skip another 3 hours
+        oracle.decreasePrice();
+        oracle.decreasePrice();
+        skip(3600 * 21); // Skip another 21 hours
 
         uint256 secondUpdatePrice = oracle.readData();
-        oracleConverter.updateOracleValues(); // Second update after 3 hours
+        oracleConverter.updateOracleValues(); // Second update after 21 hours
 
         (uint256 maxPrice, ) = oracleConverter.readMaxPrice();
         (uint256 minPrice, ) = oracleConverter.readMinPrice();
@@ -70,8 +72,12 @@ contract OracleConverterTest is Test, Utilities {
         uint256 firstUpdatePrice = oracle.readData();
         oracleConverter.updateOracleValues(); // First update after 2 days
 
+        uint8 liveHour = uint8((block.timestamp / (1 hours)) % 24);
         for (uint8 i = 0; i < 24; i++) {
-            assertEq(firstUpdatePrice, oracleConverter.movingPrice(i)); // assert the 'if' condition inside the updateOracleValues()
+            assertEq(
+                oracleConverter.movingPrice(i),
+                i == liveHour ? firstUpdatePrice : ORACLE_EXCHANGE_RATE
+            ); // skipped hours carry the previous bucket forward
         }
         oracle.decreasePrice();
         oracle.decreasePrice();
