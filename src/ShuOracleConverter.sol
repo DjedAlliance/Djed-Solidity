@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AEL
 pragma solidity ^0.8.0;
-import "forge-std/console.sol";
 
 import "./IOracle.sol";
 import "./IOracleShu.sol";
@@ -49,25 +48,18 @@ contract ShuOracleConverter is IOracleShu {
         uint8 currentHour = uint8(
             (block.timestamp / (1 hours)) % UPDATE_TIME_IN_HOUR
         );
-        if (block.timestamp / (1 hours) - previousHour >= 1) {
+        if (block.timestamp / (1 hours) > lastTimestamp / (1 hours)) {
             _updatesSinceHourStart = 0;
             uint8 hourCount = (currentHour > previousHour)
                 ? currentHour - previousHour
                 : UPDATE_TIME_IN_HOUR + currentHour - previousHour;
-            uint256 latestPrice = oracle.readData();
+            uint256 carriedPrice = movingPrice[previousHour];
 
             for (uint8 i = 1; i < hourCount; i++) {
                 movingPrice[
                     (previousHour + i) % UPDATE_TIME_IN_HOUR
-                ] = latestPrice;
+                ] = carriedPrice;
             }
-            if (_shouldUpdateMinMax(_minPriceIndex, currentHour)) {
-                _updateMinPrice();
-            }
-            if (_shouldUpdateMinMax(_maxPriceIndex, currentHour)) {
-                _updateMaxPrice();
-            }
-            previousHour = currentHour;
         }
 
         uint256 latestAveragePrice = (movingPrice[currentHour] *
@@ -77,13 +69,21 @@ contract ShuOracleConverter is IOracleShu {
 
         movingPrice[currentHour] = latestAveragePrice;
 
-        if (latestAveragePrice < _minPrice) {
+        if (_shouldUpdateMinMax(_minPriceIndex, currentHour)) {
+            _updateMinPrice();
+        } else if (latestAveragePrice < _minPrice) {
             _minPrice = latestAveragePrice;
             _minPriceIndex = currentHour;
+        }
+
+        if (_shouldUpdateMinMax(_maxPriceIndex, currentHour)) {
+            _updateMaxPrice();
         } else if (latestAveragePrice > _maxPrice) {
             _maxPrice = latestAveragePrice;
             _maxPriceIndex = currentHour;
         }
+
+        previousHour = currentHour;
         lastTimestamp = block.timestamp;
     }
 
