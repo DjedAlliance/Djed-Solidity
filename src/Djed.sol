@@ -37,29 +37,53 @@ contract Djed is ReentrancyGuard {
     event SoldReserveCoins(address indexed seller, address indexed receiver, uint256 amountRC, uint256 amountBC);
     event SoldBothCoins(address indexed seller, address indexed receiver, uint256 amountSC, uint256 amountRC, uint256 amountBC);
 
+    struct TreasuryParams {
+        address treasury;
+        uint256 initialTreasuryFee;
+        uint256 treasuryRevenueTarget;
+    }
+
+    struct DjedParams {
+        uint256 reserveRatioMin;
+        uint256 reserveRatioMax;
+        uint256 fee;
+        uint256 thresholdSupplySC;
+        uint256 rcMinPrice;
+        uint256 rcInitialPrice;
+        uint256 txLimit;
+    }
+
+    struct CoinParams {
+        string stableName;
+        string stableSymbol;
+        string reserveName;
+        string reserveSymbol;
+    }
+
     constructor(
-        address oracleAddress, uint256 _scalingFactor,
-        address _treasury, uint256 _initialTreasuryFee, uint256 _treasuryRevenueTarget,
-        uint256 _reserveRatioMin, uint256 _reserveRatioMax,
-        uint256 _fee, uint256 _thresholdSupplySC, uint256 _rcMinPrice, uint256 _rcInitialPrice, uint256 _txLimit
+        address oracleAddress,
+        uint256 _scalingFactor,
+        TreasuryParams memory treasuryParams,
+        DjedParams memory djedParams,
+        CoinParams memory coinParams
     ) payable {
-        stableCoin = new Coin("StableCoin", "SC");
-        reserveCoin = new Coin("ReserveCoin", "RC");
+        stableCoin = new Coin(coinParams.stableName, coinParams.stableSymbol);
+        reserveCoin = new Coin(coinParams.reserveName, coinParams.reserveSymbol);
         scDecimalScalingFactor = 10**stableCoin.decimals();
         rcDecimalScalingFactor = 10**reserveCoin.decimals();
         scalingFactor = _scalingFactor;
 
-        treasury = _treasury;
-        initialTreasuryFee = _initialTreasuryFee;
-        treasuryRevenueTarget = _treasuryRevenueTarget;
+        treasury = treasuryParams.treasury;
+        initialTreasuryFee = treasuryParams.initialTreasuryFee;
+        treasuryRevenueTarget = treasuryParams.treasuryRevenueTarget;
 
-        reserveRatioMin = _reserveRatioMin;
-        reserveRatioMax = _reserveRatioMax;
-        fee = _fee;
-        thresholdSupplySC = _thresholdSupplySC;
-        rcMinPrice = _rcMinPrice;
-        rcInitialPrice = _rcInitialPrice;
-        txLimit = _txLimit;
+        reserveRatioMin = djedParams.reserveRatioMin;
+        reserveRatioMax = djedParams.reserveRatioMax;
+        fee = djedParams.fee;
+        thresholdSupplySC = djedParams.thresholdSupplySC;
+        rcMinPrice = djedParams.rcMinPrice;
+        rcInitialPrice = djedParams.rcInitialPrice;
+        txLimit = djedParams.txLimit;
 
         oracle = IOracle(oracleAddress);
         oracle.acceptTermsOfService();
@@ -87,9 +111,10 @@ contract Djed is ReentrancyGuard {
     }
 
     function ratio() external view returns (uint256) {
-        return scalingFactor * R(0) / L(scPrice(0));
+        uint256 liabilities = L(scPrice(0));
+        require(liabilities > 0, "ratio: liabilities zero");
+        return (scalingFactor * R(0)) / liabilities;
     }
-
     // # Public Trading Functions:
 
     function buyStableCoins(address receiver, uint256 feeUI, address ui) external payable nonReentrant {
