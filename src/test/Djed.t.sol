@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: AEL
 pragma solidity ^0.8.0;
 
-import "./utils/Cheatcodes.sol";
-import "./utils/Console.sol";
-import "./utils/Ctest.sol";
+import "forge-std/Test.sol";
 import "../Djed.sol";
 import "../mock/MockOracle.sol";
 import "./Utilities.sol";
 
-contract DjedTest is CTest, Utilities {
+contract DjedTest is Test, Utilities {
     MockOracle private oracle;
     Djed private djed;
-    CheatCodes private cheats = CheatCodes(HEVM_ADDRESS);
 
     function setUp() public {
         oracle = new MockOracle(ORACLE_EXCHANGE_RATE);
@@ -29,8 +26,8 @@ contract DjedTest is CTest, Utilities {
             RESERVE_COIN_WHOLE_INITIAL_PRICE,
             TX_LIMIT
         );
-        cheats.deal(account1, 100 ether);
-        cheats.deal(account2, 100 ether);
+        vm.deal(account1, 100 ether);
+        vm.deal(account2, 100 ether);
 
         // Verify Djed parameters:
         assertTrue(RESERVE_RATIO_MIN > (SCALING_FACTOR + FEE));
@@ -46,7 +43,7 @@ contract DjedTest is CTest, Utilities {
     }
 
     function testBuyStableCoins() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 1e18}(account1, 0, address(0)); // 1 ADA
         assertEq(djed.stableCoin().balanceOf(account1), 1980000); // 1.98 SC
         assertEq(djed.stableCoin().totalSupply(), 1980000);
@@ -55,13 +52,13 @@ contract DjedTest is CTest, Utilities {
     }
 
     function testSellStableCoins() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 1e18}(account1, 0, address(0)); // 1 ADA
         assertEq(djed.stableCoin().balanceOf(account1), 1980000); // 1.98 SC
         assertEq(djed.stableCoin().totalSupply(), 1980000);
         assertEq(djed.reserveCoin().totalSupply(), 0);
         assertEq(R(djed), 2e18); // 2 ADA
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellStableCoins(1980000, account1, 0, address(0));
         assertEq(djed.stableCoin().balanceOf(account1), 0); // 1.98 SC
         assertEq(djed.stableCoin().totalSupply(), 0);
@@ -71,7 +68,7 @@ contract DjedTest is CTest, Utilities {
 
     function testBuyReserveCoinsBelowThreshold() public {
         assertTrue(djed.stableCoin().totalSupply() <= THRESHOLD_NUMBER_SC);
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: 1e18}(account1, 0, address(0)); // 1 ADA
         assertEq(djed.stableCoin().balanceOf(account1), 0); // 0 SC
         assertEq(djed.reserveCoin().balanceOf(account1), 9900); // 0.0099 RC
@@ -81,7 +78,7 @@ contract DjedTest is CTest, Utilities {
     }
 
     function testBuyReserveCoinsAboveThreshold() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 2e18}(account1, 0, address(0)); // 2 ADA
 
         assertEq(djed.stableCoin().balanceOf(account1), 3960000); // 3.96 SC
@@ -90,7 +87,7 @@ contract DjedTest is CTest, Utilities {
             R(djed) / 1e12 <= (L(djed) * RESERVE_RATIO_MAX) / SCALING_FACTOR
         );
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: 1e16}(account1, 0, address(0)); // 0.0001 ADA
         assertEq(djed.reserveCoin().totalSupply(), 99);
         assertEq(djed.reserveCoin().balanceOf(account1), 99); // 0.000099 RC
@@ -100,41 +97,41 @@ contract DjedTest is CTest, Utilities {
     }
 
     function testCannotBuyReserveCoins() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 7e17}(account1, 0, address(0)); // 0.7 ADA
 
         assertEq(djed.stableCoin().balanceOf(account1), 1386000); // 1.386 SC
         assertTrue(djed.stableCoin().totalSupply() >= THRESHOLD_NUMBER_SC);
 
-        cheats.expectRevert("buyRC: ratio above max");
-        cheats.prank(account2);
+        vm.expectRevert("buyRC: ratio above max");
+        vm.prank(account2);
         djed.buyReserveCoins{value: 1e18}(account1, 0, address(0)); // 1 ADA
     }
 
     function testCannotBuyStableCoins() public {
-        cheats.prank(account1);
-        cheats.expectRevert("buySC: ratio below min");
+        vm.prank(account1);
+        vm.expectRevert("buySC: ratio below min");
         djed.buyStableCoins{value: 100e18}(account1, 0, address(0)); // 100 ADA
     }
 
     function testCannotSellReserveCoins() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: 10e18}(account1, 0, address(0)); // 10 ADA
         assertEq(djed.reserveCoin().totalSupply(), 99e3); // 0.099 RC
         assertEq(djed.reserveCoin().balanceOf(account1), 99e3); // 0.099 RC
         assertEq(R(djed), 11e18); // 11 ADA
         assertEq(djed.stableCoin().totalSupply(), 0);
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 90e18}(account1, 0, address(0)); // ~180 SC
 
-        cheats.prank(account1);
-        cheats.expectRevert("sellRC: ratio below min");
+        vm.prank(account1);
+        vm.expectRevert("sellRC: ratio below min");
         djed.sellReserveCoins(99e3, account1, 0, address(0));
     }
 
     function testSellBothCoins() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 1e17}(account1, 0, address(0));
         djed.buyReserveCoins{value: 1e20}(account1, 0, address(0));
 
@@ -144,7 +141,7 @@ contract DjedTest is CTest, Utilities {
         assertEq(djed.stableCoin().balanceOf(account1), 198000);
         assertEq(djed.reserveCoin().balanceOf(account1), 990000);
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellBothCoins(8000, 9000, account1, 0, address(0));
 
         assertEq(djed.stableCoin().balanceOf(account1), 190000);
@@ -158,40 +155,40 @@ contract DjedTest is CTest, Utilities {
     }
 
     function testCannotSellBothCoinsInsufficientBalance() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 1e17}(account1, 0, address(0));
         djed.buyReserveCoins{value: 1e20}(account1, 0, address(0));
 
         uint256 scBalanceBefore = djed.stableCoin().balanceOf(account1);
         uint256 rcBalanceBefore = djed.reserveCoin().balanceOf(account1);
 
-        cheats.expectRevert("sellBoth: insufficient SCs");
+        vm.expectRevert("sellBoth: insufficient SCs");
         djed.sellBothCoins(scBalanceBefore + 1, 0, account1, 0, address(0));
 
-        cheats.prank(account1);
-        cheats.expectRevert("sellBoth: insufficient RCs");
+        vm.prank(account1);
+        vm.expectRevert("sellBoth: insufficient RCs");
         djed.sellBothCoins(0, rcBalanceBefore + 1, account1, 0, address(0));
     }
 
     function testCannotSellBothCoinsRatioDecreased() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 1e17}(account1, 0, address(0));
         djed.buyReserveCoins{value: 1e20}(account1, 0, address(0));
 
-        cheats.prank(account1);
-        cheats.expectRevert("sellBoth: ratio decreased");
+        vm.prank(account1);
+        vm.expectRevert("sellBoth: ratio decreased");
         djed.sellBothCoins(0, 1, account1, 0, address(0));
     }
 
     function testSellStableWithSellBothMethod() public {
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: 1e17}(account1, 0, address(0));
         djed.buyReserveCoins{value: 1e20}(account1, 0, address(0));
 
         uint256 scBalanceBefore = djed.stableCoin().balanceOf(account1);
         uint256 rcBalanceBefore = djed.reserveCoin().balanceOf(account1);
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellBothCoins(scBalanceBefore, 0, account1, 0, address(0));
 
         uint256 scBalanceAfter = djed.stableCoin().balanceOf(account1);

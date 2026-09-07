@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: AEL
 pragma solidity ^0.8.0;
 
-import "./utils/Cheatcodes.sol";
-import "./utils/Console.sol";
-import "./utils/Ctest.sol";
+import "forge-std/Test.sol";
 import "../Djed.sol";
 import "../mock/MockOracle.sol";
 import "./Utilities.sol";
 
-contract TransactionLimitTest is CTest, Utilities {
+contract TransactionLimitTest is Test, Utilities {
     MockOracle oracle;
     Djed djed;
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
 
     function setUp() public {
         THRESHOLD_NUMBER_SC = 0.5 * 1e6; // 0.5 SC
@@ -32,8 +29,8 @@ contract TransactionLimitTest is CTest, Utilities {
             RESERVE_COIN_WHOLE_INITIAL_PRICE,
             TX_LIMIT
         );
-        cheats.deal(account1, 100 ether);
-        cheats.deal(account2, 100 ether);
+        vm.deal(account1, 100 ether);
+        vm.deal(account2, 100 ether);
 
         // Verify Djed parameters:
         assertTrue(RESERVE_RATIO_MIN > (SCALING_FACTOR + FEE));
@@ -48,13 +45,13 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Enforcing tx limit check
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         assertEq(djed.stableCoin().balanceOf(account1), 1.98 * 1e6);
         assertTrue(djed.stableCoin().totalSupply() > THRESHOLD_NUMBER_SC);
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0));
 
         /*
@@ -69,7 +66,7 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Enforcing tx limit check
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         assertEq(djed.stableCoin().balanceOf(account1), 1.98 * 1e6);
@@ -79,8 +76,8 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 smallAmountBC = 0.011 * 1e18; // 0.011 ADA
         buyAmount += smallAmountBC; // 1.011 ADA
 
-        cheats.prank(account1);
-        cheats.expectRevert("buySC: tx limit exceeded");
+        vm.prank(account1);
+        vm.expectRevert("buySC: tx limit exceeded");
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0));
 
         /*
@@ -96,17 +93,17 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Enforcing tx limit check
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         assertEq(djed.stableCoin().balanceOf(account1), 1.98 * 1e6);
         assertTrue(djed.stableCoin().totalSupply() > THRESHOLD_NUMBER_SC);
 
         // Buying 2 times - 2 ADA
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0));
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0));
 
         /*
@@ -119,7 +116,7 @@ contract TransactionLimitTest is CTest, Utilities {
         // Selling exactly equal to txLimit (2 SC)
         uint256 sellAmount = TX_LIMIT; // 2 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellStableCoins(sellAmount, account1, 0, address(0));
 
         assertEq(djed.stableCoin().balanceOf(account1), 3.94 * 1e6); // 5.94 - 2 SC
@@ -129,17 +126,17 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Enforcing tx limit check
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         assertEq(djed.stableCoin().balanceOf(account1), 1.98 * 1e6);
         assertTrue(djed.stableCoin().totalSupply() > THRESHOLD_NUMBER_SC);
 
         // Buying 2 times - 2 ADA
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0));
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0));
 
         /*
@@ -152,8 +149,8 @@ contract TransactionLimitTest is CTest, Utilities {
         // Selling little more than txLimit (2 SC)
         uint256 sellAmount = TX_LIMIT + 1; // 2.000001 SC
 
-        cheats.prank(account1);
-        cheats.expectRevert("sellSC: tx limit exceeded");
+        vm.prank(account1);
+        vm.expectRevert("sellSC: tx limit exceeded");
         djed.sellStableCoins(sellAmount, account1, 0, address(0));
 
         assertEq(djed.stableCoin().balanceOf(account1), 5.94 * 1e6);
@@ -163,21 +160,21 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Enforcing tx limit check
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         assertEq(djed.stableCoin().balanceOf(account1), 1.98 * 1e6);
         assertTrue(djed.stableCoin().totalSupply() > THRESHOLD_NUMBER_SC);
 
         // Buying 2 more times to decrease Reserve Ratio (should be less than R.R.max)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         // Buying reserve coin
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: buyAmount}(account1, 0, address(0)); // 1 ADA
 
         /*
@@ -193,7 +190,7 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Enforcing tx limit check
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         assertEq(djed.stableCoin().balanceOf(account1), 1.98 * 1e6);
@@ -203,8 +200,8 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 smallAmountBC = 0.011 * 1e18; // 0.011 ADA
         buyAmount += smallAmountBC; // 1.011 ADA
 
-        cheats.prank(account1);
-        cheats.expectRevert("buyRC: tx limit exceeded");
+        vm.prank(account1);
+        vm.expectRevert("buyRC: tx limit exceeded");
         djed.buyReserveCoins{value: buyAmount}(account1, 0, address(0));
 
         /*
@@ -225,13 +222,13 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Buying 3 times to decrease Reserve Ratio (should be less than R.R.max) (Increase Reserve by 3)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         // Checking tx limit checks should be applicable
@@ -239,7 +236,7 @@ contract TransactionLimitTest is CTest, Utilities {
         assertTrue(djed.stableCoin().totalSupply() > THRESHOLD_NUMBER_SC);
 
         // Buying reserve coin (Increase Reserve by 1)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: buyAmount}(account1, 0, address(0)); // 1 ADA
 
         /*
@@ -251,13 +248,13 @@ contract TransactionLimitTest is CTest, Utilities {
         assertEq(djed.reserveCoin().balanceOf(account1), 0.99 * 1e4);
 
         // Selling 5 SC to increase Reserve Ratio (Decrease Reserve by 2.5)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellStableCoins(2e6, account1, 0, address(0)); // 2 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellStableCoins(2e6, account1, 0, address(0)); // 2 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellStableCoins(1 * 1e6, account1, 0, address(0)); // 1 SC
 
         /*
@@ -273,7 +270,7 @@ contract TransactionLimitTest is CTest, Utilities {
          * Actual value for n should be more lesser than 0.5 due to inclusion of fees
          */
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellReserveCoins(0.48 * 1e4, account1, 0, address(0));
     }
 
@@ -281,13 +278,13 @@ contract TransactionLimitTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Buying 3 times to decrease Reserve Ratio (should be less than R.R.max) (Increase Reserve by 3)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, 0, address(0)); // 1.98 SC
 
         // Checking tx limit checks should be applicable
@@ -295,7 +292,7 @@ contract TransactionLimitTest is CTest, Utilities {
         assertTrue(djed.stableCoin().totalSupply() > THRESHOLD_NUMBER_SC);
 
         // Buying reserve coin (Increase Reserve by 1)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: buyAmount}(account1, 0, address(0)); // 1 ADA
 
         /*
@@ -307,13 +304,13 @@ contract TransactionLimitTest is CTest, Utilities {
         assertEq(djed.reserveCoin().balanceOf(account1), 0.99 * 1e4);
 
         // Selling 5 SC to increase Reserve Ratio (Decrease Reserve by 2.5)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellStableCoins(2e6, account1, 0, address(0)); // 2 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellStableCoins(2e6, account1, 0, address(0)); // 2 SC
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellStableCoins(1 * 1e6, account1, 0, address(0)); // 1 SC
 
         /*
@@ -329,8 +326,8 @@ contract TransactionLimitTest is CTest, Utilities {
          * Actual value for n should be more lesser than 0.5 to pass the tx limit check due to inclusion of fees
          */
 
-        cheats.prank(account1);
-        cheats.expectRevert("sellRC: tx limit exceeded");
+        vm.prank(account1);
+        vm.expectRevert("sellRC: tx limit exceeded");
         djed.sellReserveCoins(0.49 * 1e4, account1, 0, address(0));
     }
 }

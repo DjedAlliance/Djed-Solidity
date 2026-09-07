@@ -1,19 +1,16 @@
 // SPDX-License-Identifier: AEL
 pragma solidity ^0.8.0;
 
-import "./utils/Cheatcodes.sol";
-import "./utils/Console.sol";
-import "./utils/Ctest.sol";
+import "forge-std/Test.sol";
 
 import "../Djed.sol";
 
 import "../mock/MockOracle.sol";
 import "./Utilities.sol";
 
-contract FeeTest is CTest, Utilities {
+contract FeeTest is Test, Utilities {
     MockOracle oracle;
     Djed djed;
-    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
 
     function setUp() public {
         INITIAL_TREASURY_FEE = (5 * SCALING_FACTOR) / 100; // 5%
@@ -36,8 +33,8 @@ contract FeeTest is CTest, Utilities {
             RESERVE_COIN_WHOLE_INITIAL_PRICE,
             TX_LIMIT
         );
-        cheats.deal(account1, 100 ether);
-        cheats.deal(account2, 100 ether);
+        vm.deal(account1, 100 ether);
+        vm.deal(account2, 100 ether);
 
         // Verify Djed parameters:
         assertTrue(RESERVE_RATIO_MIN > (SCALING_FACTOR + FEE));
@@ -61,7 +58,7 @@ contract FeeTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Buying stable coin for account (account 3) different than msg.sender (account 1)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account3, UI_FEE, UI_DEVELOPER); // 1 ADA
 
         (
@@ -103,7 +100,7 @@ contract FeeTest is CTest, Utilities {
         uint256 nSC = 0;
 
         // Buying stable coin
-        cheats.prank(account1);
+        vm.prank(account1);
 
         // Buying for account1
         uint256 buyAmount = 1e18; // 1 ADA
@@ -132,7 +129,7 @@ contract FeeTest is CTest, Utilities {
         uiDeveloperBalance += ui_fee;
 
         // Selling stable coin
-        cheats.prank(account1);
+        vm.prank(account1);
 
         // Selling stable coin for account (account 3) different than msg.sender (account 1)
         djed.sellStableCoins(amountReceived, account3, UI_FEE, UI_DEVELOPER); // 1 ADA
@@ -169,7 +166,7 @@ contract FeeTest is CTest, Utilities {
 
         // buy and sell stable coins until treasury balance is less than treasury target
         while (treasuryBalance < TREASURY_REVENUE_TARGET) {
-            cheats.prank(account1);
+            vm.prank(account1);
             djed.buyStableCoins{value: buyAmount}(
                 account1,
                 UI_FEE,
@@ -202,7 +199,7 @@ contract FeeTest is CTest, Utilities {
             assertEq(djed.stableCoin().totalSupply(), nSC);
             assertEq(R(djed), currentReserve);
 
-            cheats.prank(account1);
+            vm.prank(account1);
             djed.sellStableCoins(
                 amountReceived,
                 account1,
@@ -226,7 +223,7 @@ contract FeeTest is CTest, Utilities {
             assertEq(R(djed), currentReserve);
         }
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account1, UI_FEE, UI_DEVELOPER); // 1 ADA
 
         // treasury fee must be 0
@@ -242,7 +239,7 @@ contract FeeTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Buying reserve coin for account (account 3) different than msg.sender (account 1)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: buyAmount}(account3, UI_FEE, UI_DEVELOPER); // 1 ADA
 
         (
@@ -282,7 +279,7 @@ contract FeeTest is CTest, Utilities {
 
         uint256 buyAmount = 2e18;
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyStableCoins{value: buyAmount}(account3, UI_FEE, UI_DEVELOPER); // 1 ADA
 
         uint256 scReceived = amountAfterDeductionInSC(
@@ -310,7 +307,7 @@ contract FeeTest is CTest, Utilities {
 
         buyAmount = 1e16;
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: buyAmount}(account3, UI_FEE, UI_DEVELOPER); // 1 ADA
 
         (fee, t_fee, ui_fee, totalFees) = calculateFees(
@@ -352,7 +349,7 @@ contract FeeTest is CTest, Utilities {
         uint256 buyAmount = 1e18; // 1 ADA
 
         // Buying reserve coin for account (account 3) different than msg.sender (account 1)
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.buyReserveCoins{value: buyAmount}(account1, UI_FEE, UI_DEVELOPER);
 
         (
@@ -382,7 +379,7 @@ contract FeeTest is CTest, Utilities {
         assertEq(TREASURY.balance, t_fee);
         assertEq(djed.reserveCoin().balanceOf(account1), amtReceived);
 
-        cheats.prank(account1);
+        vm.prank(account1);
         djed.sellReserveCoins(amtReceived, account3, UI_FEE, UI_DEVELOPER);
 
         uint256 expectedPreFeeBC = (rcTargetPrice(nRC, 0, reserve) *
