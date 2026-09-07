@@ -21,6 +21,11 @@ contract Utilities {
     uint256 THRESHOLD_NUMBER_SC = 1e6;
     uint256 TX_LIMIT = 200e6; // 200 SC
 
+    string constant NAME_SC = "StableCoin";
+    string constant SYMBOL_SC = "SC";
+    string constant NAME_RC = "ReserveCoin";
+    string constant SYMBOL_RC = "RC";
+
     uint64 constant ORACLE_EXCHANGE_RATE = 1e18 / 2; // 1 USD = 0.5 ADA (ADA per USD)
 
     address constant TREASURY = 0x078D888E40faAe0f32594342c85940AF3949E666;

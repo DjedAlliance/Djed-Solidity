@@ -29,6 +29,11 @@ contract DeploymentParameters {
     uint256 public RESERVE_COIN_INITIAL_PRICE;
     uint256 public TX_LIMIT;
 
+    string public NAME_SC = "StableCoin";
+    string public SYMBOL_SC = "SC";
+    string public NAME_RC = "ReserveCoin";
+    string public SYMBOL_RC = "RC";
+
     address constant CHAINLINK_SEPOLIA_INVERTED_ORACLE_ADDRESS = 0xB9C050Fd340aD5ED3093F31aAFAcC3D779f405f4;
     address constant HEBESWAP_ORACLE_INVERTED_ADDRESS_MORDOR = 0xb0d99da21Bb4fa877e3D1DCA89E6657c5e840Eb2;
     address constant HEBESWAP_ORACLE_INVERTED_ADDRESS_MAINNET = 0x2fd961e20896e121EC7D499cC4F38462e286994A;
@@ -50,6 +55,7 @@ contract DeploymentParameters {
     )
         internal
         returns (
+            string memory, string memory, string memory, string memory,
             address, address, 
             uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256
         )
@@ -102,6 +108,10 @@ contract DeploymentParameters {
         }
 
         return (
+            NAME_SC,
+            SYMBOL_SC,
+            NAME_RC,
+            SYMBOL_RC,
             oracleAddress,
             treasuryAddress,
             SCALING_FACTOR,

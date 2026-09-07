@@ -12,6 +12,10 @@ contract DeployDjedShu is Script, DeploymentParameters {
 
         vm.startBroadcast(senderPrivateKey);
         (
+            string memory nameSC,
+            string memory symbolSC,
+            string memory nameRC,
+            string memory symbolRC,
             address oracleAddress,
             address treasuryAddress,
             uint256 SCALING_FACTOR,
@@ -27,6 +31,10 @@ contract DeployDjedShu is Script, DeploymentParameters {
         ) = getConfigFromNetwork(network, version);
 
         DjedShu djedShu = new DjedShu{value: INITIAL_BALANCE}(
+            nameSC,
+            symbolSC,
+            nameRC,
+            symbolRC,
             oracleAddress,
             SCALING_FACTOR,
             treasuryAddress,

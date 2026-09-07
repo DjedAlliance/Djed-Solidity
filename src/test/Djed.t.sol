@@ -16,6 +16,10 @@ contract DjedTest is CTest, Utilities {
     function setUp() public {
         oracle = new MockOracle(ORACLE_EXCHANGE_RATE);
         djed = (new Djed){value: INITIAL_BALANCE}(
+            NAME_SC,
+            SYMBOL_SC,
+            NAME_RC,
+            SYMBOL_RC,
             address(oracle),
             SCALING_FACTOR,
             TREASURY,

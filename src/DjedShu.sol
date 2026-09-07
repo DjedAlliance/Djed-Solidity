@@ -38,13 +38,15 @@ contract DjedShu is ReentrancyGuard {
     event SoldBothCoins(address indexed seller, address indexed receiver, uint256 amountSC, uint256 amountRC, uint256 amountBC);
 
     constructor(
+        string memory nameSC, string memory symbolSC,
+        string memory nameRC, string memory symbolRC,
         address oracleAddress, uint256 _scalingFactor,
         address _treasury, uint256 _initialTreasuryFee, uint256 _treasuryRevenueTarget,
         uint256 _reserveRatioMin, uint256 _reserveRatioMax,
         uint256 _fee, uint256 _thresholdSupplySC, uint256 _rcMinPrice, uint256 _rcInitialPrice, uint256 _txLimit
     ) payable {
-        stableCoin = new Coin("StableCoin", "SC");
-        reserveCoin = new Coin("ReserveCoin", "RC");
+        stableCoin = new Coin(nameSC, symbolSC);
+        reserveCoin = new Coin(nameRC, symbolRC);
         scDecimalScalingFactor = 10**stableCoin.decimals();
         rcDecimalScalingFactor = 10**reserveCoin.decimals();
         scalingFactor = _scalingFactor;
