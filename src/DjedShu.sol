@@ -87,11 +87,19 @@ contract DjedShu is ReentrancyGuard {
     }
 
     function ratioMax() external view returns (uint256) {
-        return scalingFactor * R(0) / L(scMaxPrice(0));
+        uint256 liabilities = L(scMaxPrice(0));
+        if (liabilities == 0) {
+            return type(uint256).max;
+        }
+        return (scalingFactor * R(0)) / liabilities;
     }
 
     function ratioMin() external view returns (uint256) {
-        return scalingFactor * R(0) / L(scMinPrice(0));
+        uint256 liabilities = L(scMinPrice(0));
+        if (liabilities == 0) {
+            return type(uint256).max;
+        }
+        return (scalingFactor * R(0)) / liabilities;
     }
 
     // # Public Trading Functions:

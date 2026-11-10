@@ -45,6 +45,27 @@ contract DjedTest is CTest, Utilities {
         assertEq(R(djed), INITIAL_BALANCE);
     }
 
+    function testRatioZeroLiabilitiesReturnsMax() public {
+        assertEq(djed.ratio(), type(uint256).max);
+    }
+
+    function testRatioWithLiabilities() public {
+        cheats.prank(account1);
+        djed.buyStableCoins{value: 1e18}(account1, 0, address(0)); // 1 ADA
+        uint256 expectedRatio = (SCALING_FACTOR * R(djed)) / L(djed);
+        assertEq(djed.ratio(), expectedRatio);
+    }
+
+    function testRatioZeroLiabilitiesAfterSellingAllStableCoins() public {
+        cheats.prank(account1);
+        djed.buyStableCoins{value: 1e18}(account1, 0, address(0));
+        uint256 balance = djed.stableCoin().balanceOf(account1);
+        cheats.prank(account1);
+        djed.sellStableCoins(balance, account1, 0, address(0));
+        assertEq(djed.stableCoin().totalSupply(), 0);
+        assertEq(djed.ratio(), type(uint256).max);
+    }
+
     function testBuyStableCoins() public {
         cheats.prank(account1);
         djed.buyStableCoins{value: 1e18}(account1, 0, address(0)); // 1 ADA

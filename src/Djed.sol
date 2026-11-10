@@ -87,7 +87,11 @@ contract Djed is ReentrancyGuard {
     }
 
     function ratio() external view returns (uint256) {
-        return scalingFactor * R(0) / L(scPrice(0));
+        uint256 liabilities = L(scPrice(0));
+        if (liabilities == 0) {
+            return type(uint256).max;
+        }
+        return (scalingFactor * R(0)) / liabilities;
     }
 
     // # Public Trading Functions:
