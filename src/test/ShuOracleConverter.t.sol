@@ -92,6 +92,19 @@ contract OracleConverterTest is Test, Utilities {
         assertEq(maxPrice, firstUpdatePrice);
         assertEq(minPrice, secondUpdatePrice);
     }
-}
 
-// forge test -vvvv --match-path "src/test/ShuOracleConverter.t.sol"
+    function test_updateOracleValues_twentyFiveHoursPassed() public {
+        skip(3600);
+        oracle.increasePrice();
+        uint256 higherPrice = oracle.readData();
+        oracleConverter.updateOracleValues();
+
+        // Skip 25 hours (more than full 24h window)
+        skip(3600 * 25);
+        oracle.increasePrice();
+        oracleConverter.updateOracleValues();
+
+        (uint256 minPrice, ) = oracleConverter.readMinPrice();
+        assertEq(minPrice, higherPrice);
+    }
+}
