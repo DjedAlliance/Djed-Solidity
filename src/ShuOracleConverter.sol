@@ -48,17 +48,23 @@ contract ShuOracleConverter is IOracleShu {
         uint8 currentHour = uint8(
             (block.timestamp / (1 hours)) % UPDATE_TIME_IN_HOUR
         );
-        if (block.timestamp / (1 hours) > lastTimestamp / (1 hours)) {
+        uint256 elapsedHours = (block.timestamp / (1 hours)) -
+            (lastTimestamp / (1 hours));
+        if (elapsedHours > 0) {
             _updatesSinceHourStart = 0;
-            uint8 hourCount = (currentHour > previousHour)
-                ? currentHour - previousHour
-                : UPDATE_TIME_IN_HOUR + currentHour - previousHour;
             uint256 carriedPrice = movingPrice[previousHour];
 
-            for (uint8 i = 1; i < hourCount; i++) {
-                movingPrice[
-                    (previousHour + i) % UPDATE_TIME_IN_HOUR
-                ] = carriedPrice;
+            if (elapsedHours >= UPDATE_TIME_IN_HOUR) {
+                for (uint8 i = 0; i < UPDATE_TIME_IN_HOUR; i++) {
+                    movingPrice[i] = carriedPrice;
+                }
+            } else {
+                uint8 hourCount = uint8(elapsedHours);
+                for (uint8 i = 1; i < hourCount; i++) {
+                    movingPrice[
+                        (previousHour + i) % UPDATE_TIME_IN_HOUR
+                    ] = carriedPrice;
+                }
             }
         }
 
@@ -69,14 +75,20 @@ contract ShuOracleConverter is IOracleShu {
 
         movingPrice[currentHour] = latestAveragePrice;
 
-        if (_shouldUpdateMinMax(_minPriceIndex, currentHour)) {
+        if (
+            elapsedHours >= UPDATE_TIME_IN_HOUR ||
+            _shouldUpdateMinMax(_minPriceIndex, currentHour)
+        ) {
             _updateMinPrice();
         } else if (latestAveragePrice < _minPrice) {
             _minPrice = latestAveragePrice;
             _minPriceIndex = currentHour;
         }
 
-        if (_shouldUpdateMinMax(_maxPriceIndex, currentHour)) {
+        if (
+            elapsedHours >= UPDATE_TIME_IN_HOUR ||
+            _shouldUpdateMinMax(_maxPriceIndex, currentHour)
+        ) {
             _updateMaxPrice();
         } else if (latestAveragePrice > _maxPrice) {
             _maxPrice = latestAveragePrice;
