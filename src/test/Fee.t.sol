@@ -34,7 +34,11 @@ contract FeeTest is CTest, Utilities {
             THRESHOLD_NUMBER_SC,
             RESERVE_COIN_WHOLE_MINIMUM_PRICE,
             RESERVE_COIN_WHOLE_INITIAL_PRICE,
-            TX_LIMIT
+            TX_LIMIT,
+            STABLE_COIN_NAME,
+            STABLE_COIN_SYMBOL,
+            RESERVE_COIN_NAME,
+            RESERVE_COIN_SYMBOL
         );
         cheats.deal(account1, 100 ether);
         cheats.deal(account2, 100 ether);

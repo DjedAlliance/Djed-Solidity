@@ -38,13 +38,14 @@ contract DeployDjed is Script, DeploymentParameters {
             THREASHOLD_SUPPLY_SC,
             RESERVE_COIN_MINIMUM_PRICE,
             RESERVE_COIN_INITIAL_PRICE,
-            TX_LIMIT
+            TX_LIMIT,
+            STABLE_COIN_NAME,
+            STABLE_COIN_SYMBOL,
+            RESERVE_COIN_NAME,
+            RESERVE_COIN_SYMBOL
         );
 
-        console.log(
-            "Djed contract deployed: ",
-            address(djed)
-        );
+        console.log("Djed contract deployed: ", address(djed));
         vm.stopBroadcast();
     }
 }
