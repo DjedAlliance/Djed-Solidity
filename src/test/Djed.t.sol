@@ -27,7 +27,11 @@ contract DjedTest is CTest, Utilities {
             THRESHOLD_NUMBER_SC,
             RESERVE_COIN_WHOLE_MINIMUM_PRICE,
             RESERVE_COIN_WHOLE_INITIAL_PRICE,
-            TX_LIMIT
+            TX_LIMIT,
+            STABLE_COIN_NAME,
+            STABLE_COIN_SYMBOL,
+            RESERVE_COIN_NAME,
+            RESERVE_COIN_SYMBOL
         );
         cheats.deal(account1, 100 ether);
         cheats.deal(account2, 100 ether);
@@ -39,6 +43,10 @@ contract DjedTest is CTest, Utilities {
         assertTrue(THRESHOLD_NUMBER_SC > 0);
         assertTrue(RESERVE_COIN_WHOLE_MINIMUM_PRICE > 0);
         assertTrue(ORACLE_EXCHANGE_RATE > 0);
+        assertEq(djed.stableCoin().name(), "StableCoin");
+        assertEq(djed.stableCoin().symbol(), "SC");
+        assertEq(djed.reserveCoin().name(), "ReserveCoin");
+        assertEq(djed.reserveCoin().symbol(), "RC");
     }
 
     function testInitialBalance() public {
@@ -199,5 +207,30 @@ contract DjedTest is CTest, Utilities {
 
         assertEq(scBalanceAfter, 0);
         assertEq(rcBalanceAfter, rcBalanceBefore);
+    }
+
+    function testConfigurableTokenNamesAndSymbols() public {
+        Djed customDjed = (new Djed){value: 0}(
+            address(oracle),
+            SCALING_FACTOR,
+            TREASURY,
+            INITIAL_TREASURY_FEE,
+            TREASURY_REVENUE_TARGET,
+            RESERVE_RATIO_MIN,
+            RESERVE_RATIO_MAX,
+            FEE,
+            THRESHOLD_NUMBER_SC,
+            RESERVE_COIN_WHOLE_MINIMUM_PRICE,
+            RESERVE_COIN_WHOLE_INITIAL_PRICE,
+            TX_LIMIT,
+            "CustomUSD",
+            "CUSD",
+            "CustomReserve",
+            "CRES"
+        );
+        assertEq(customDjed.stableCoin().name(), "CustomUSD");
+        assertEq(customDjed.stableCoin().symbol(), "CUSD");
+        assertEq(customDjed.reserveCoin().name(), "CustomReserve");
+        assertEq(customDjed.reserveCoin().symbol(), "CRES");
     }
 }

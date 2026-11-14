@@ -20,6 +20,10 @@ contract Utilities {
     uint256 constant RESERVE_COIN_WHOLE_INITIAL_PRICE = 1e20;
     uint256 THRESHOLD_NUMBER_SC = 1e6;
     uint256 TX_LIMIT = 200e6; // 200 SC
+    string constant STABLE_COIN_NAME = "StableCoin";
+    string constant STABLE_COIN_SYMBOL = "SC";
+    string constant RESERVE_COIN_NAME = "ReserveCoin";
+    string constant RESERVE_COIN_SYMBOL = "RC";
 
     uint64 constant ORACLE_EXCHANGE_RATE = 1e18 / 2; // 1 USD = 0.5 ADA (ADA per USD)
 
